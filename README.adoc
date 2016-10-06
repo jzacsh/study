@@ -1,0 +1,7 @@
+= study tools
+
+No idea what this repo is for. Perhaps only for the single script in
+b725c8b555e2, perhaps for a webapp if I can write one fast enough to not waste
+time footnoteref:[whythefuck, Why make a flashcard app? I dread the idea as I
+dreaded writing this one script but Quizlet is awful at helping me study
+Calculus identities]
