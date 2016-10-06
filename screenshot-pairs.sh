@@ -2,7 +2,7 @@
 set -euo pipefail
 
 this="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"; declare -r this
-{ (( $# -le 1 )) && [ ${1:-} != -h } ] && [ ${1:-} != --help } ]; } || {
+{ (( $# <= 1 )) && [ ${1:-} != -h } ] && [ ${1:-} != --help } ]; } || {
   printf 'USAGE: `%s [INTEGER]`
   Continually interrupts with area (mouse-selection) screenshots, numbering the
   even ones, and labeling the odds as "back", eg:
