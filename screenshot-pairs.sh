@@ -19,7 +19,7 @@ this="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"; declare -r this
 
   Some other likely-buggy stuff is at play (eg: trying to pause every few
   screenshots to allow you to scroll - say in a large PDF).
-  ' "$this" >&2
+' "$this" >&2
   exit 1
 }
 
