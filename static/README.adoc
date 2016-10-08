@@ -1,0 +1,75 @@
+= Documentation of this Webapp
+:swsample: https://googlechrome.github.io/samples/service-worker/custom-offline-page/
+
+Technical documentation of the contents of this directory.
+
+== Status
+This document is being written *as* I'm writing the webapp, so things here will
+likely be incorrect. As of this writing, this is more documentation on
+design/intention.
+
+== Overview
+The files in this directory represent the root of this web application. The
+landing page is index.html. The page is a static web application with only
+JavaScript at play and pre-generated content _(via some shell scripts in
+`../../`)_.
+
+=== Purpose
+The end-goal of this webapp is to facilitate offline display of front, then back
+of <<flashcards>> (webp images) on a phone, without an internet connection.
+
+== Architecture
+Currently planning to use latest service worker APIs to serve the app out of
+plain static file servers (in my case, my personal CDN), and achieve offline
+caching on my phone. To do this I've read some of the tutorials released by
+Google developer advocates and am roughly modeling HTML and JavaScript files-
+directly under `./` - after "[Service Worker Sample: Custom Offline Page
+Sample]{swsample}".
+
+[cols="2", options="header"]
+|===
+| description                     | file
+
+| root of web app                 | `./`
+| main HTTP requests              | `./index.html`
+
+| main studying UI & offline default landing page
+| `./study.html` _(`offline.html` in tutorials)_
+
+| main JavaScript for webapp      | `./offline.js`
+| this file                       | `./README.adoc`
+| service worker JavaScript       | `./worker.js`
+| UTF-8 encoded metadata file     | `./cards.index`
+| root of all flashcards sets     | `./cards/`
+| example flashcard set           | `./cards/sampleset_calc/`
+| UTF-8 encoded metadata file     | `./cards/sampleset_calc/index`
+| UTF-8 encoded metadata file     | `./cards/sampleset_calc/title`
+| UTF-8 encoded metadata file     | `./cards/sampleset_calc/description`
+| sample flashcard                | `./cards/sampleset_calc/flashcard_01_back.png.webp`
+
+| same flashcard (but it's front) | `./cards/sampleset_calc/flashcard_01_front.png.webp`
+|===
+
+[[flashcards]]
+== Static Content: Flashcards
+Flashcards are stored as descendents of `./cards/` of this root directory.
+
+=== Sets
+Flashcards are considered in "sets", grouping related cards. Sets are defined as
+all cards in a given subdirectory of `./cards/`, eg: `./cards/calc2/` might hold
+flashcards with Calculus II topics. Subdirectories are listed in a UTF-8 encoded
+file at `./cards.index`, a sibling of `./cards/` itself.
+
+.set of flashcards share the common metadata
+. title: a short description of the entire set's topic/contents 
+. description: an arbitrarily long description of the flashcard's contents.
+. index: this is a newline separated file, where each line contains the name of
+a flashcard's side. Hopefully sorted, but "back" and "front" may not be in order.
+
+Said metadata for a set can be rewritten by hand, or with `../metadata-set.sh`.
+
+==== New Sets
+To create a flashcard set quickly from screenshots, the shell script
+`../screenshot-pairs.sh` might help. Simpy create a new directory with a
+reasonable name under `./cards/`, as described above, and run the script from
+the new directory. See the script's help documentation for more.
