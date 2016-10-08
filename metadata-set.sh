@@ -24,7 +24,7 @@ fi
 
 usageTip() (
   local msg="$1"; shift
-  printf 'Error: '"$msg" $@ >&2
+  printf -- 'Error: '"$msg" $@ >&2
   printf 'See help (-h) for more.\n' >&2
   exit 1
 )
