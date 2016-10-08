@@ -1,11 +1,5 @@
 'use strict';
 
-if (! ('serviceWorker' in navigator)) {
-  let fatal = 'WTF is this browser? no service worker API found';
-  alert(fatal);
-  throw new Error(fatal); // stop this file's execution
-}
-
 let parseFromSwBlob = function(eventData) {
   if (!(eventData && eventData.length && eventData[0] == '{')) {
     return false;
@@ -15,7 +9,7 @@ let parseFromSwBlob = function(eventData) {
   return Boolean(mesg && mesg.cmd && mesg.cmd.length) ? mesg : false;
 }
 
-navigator.serviceWorker.addEventListener('message', event => {
+let serviceWorkerMessagHandler = function(event) {
   let msg = parseFromSwBlob(event.data);
   if (!msg) {
     console.warn(
@@ -39,9 +33,7 @@ navigator.serviceWorker.addEventListener('message', event => {
       console.error('Unknown service worker command, "%s"', msg.cmd);
       break;
   }
-});
-
-navigator.serviceWorker.register('worker.js');
+};
 
 let storageGetBlob = function(key) {
   let val = localStorage.getItem(key);
@@ -64,8 +56,20 @@ let refreshUi = function() {
       + 'Status: ' + (localStorage.getItem('STATUS') || 'Loading');
 };
 
-let uiTick = function(stamp /*DOMHighResTimeStamp*/) {
-  refreshUi();
-  window.requestAnimationFrame(uiTick);
+window.onload = function () {
+  if (!('serviceWorker' in navigator)) {
+    let fatal = 'WTF is this browser? no service worker API found';
+    alert(fatal);
+    throw new Error(fatal); // stop this file's execution
+  }
+
+  navigator.serviceWorker.addEventListener('message', serviceWorkerMessagHandler);
+
+  navigator.serviceWorker.register('worker.js');
+
+  let uiTick = function(stamp /*DOMHighResTimeStamp*/) {
+    refreshUi();
+    window.requestAnimationFrame(uiTick);
+  };
+  uiTick(performance.now());
 };
-uiTick(performance.now());
