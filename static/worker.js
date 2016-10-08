@@ -58,6 +58,39 @@ let installKeyVal = function(cmd, payload) {
   });
 };
 
+let parseCardIndex = function(lines) {
+  lines.sort((a, b) => {
+    const ignoreSideRegexp = /\b(front|back)\b/;
+    let aSideless = a.replace(ignoreSideRegexp, '');
+    let bSideless = b.replace(ignoreSideRegexp, '');
+    if (aSideless  == bSideless) {
+      return 0;
+    }
+    return aSideless < bSideless ? -1 : 1;
+  });
+
+  return lines.reduce(function(accum, curVal, curIdx, lns) {
+    if (!(curIdx % 2)) {
+      return accum; // we're on the front of a card
+    }
+
+    let a = lns[curIdx - 1];
+    let b = curVal;
+
+    let pair = {};
+    if (a.match(/\bfront\b/)) {
+      pair.front = a;
+      pair.back = b;
+    } else {
+      pair.front = b;
+      pair.back = a;
+    }
+
+    accum.push(pair);
+    return accum;
+  }, [/*initialValue*/]);
+};
+
 function refreshFlashcards(fileCache) {
   let parseIndexTxt = function(rawIndexTxt) {
     return rawIndexTxt.split("\n").filter(e => {
@@ -87,8 +120,7 @@ function refreshFlashcards(fileCache) {
                     return resp.text().then(body => {
                       let content;
                       if (metadata == 'index') {
-                        content = parseIndexTxt(body);
-                        cardIndex = content;
+                        content = cardIndex = parseCardIndex(parseIndexTxt(body));
                       } else {
                         content = body.trim();
                       }
