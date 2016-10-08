@@ -23,8 +23,8 @@ Currently planning to use latest service worker APIs to serve the app out of
 plain static file servers (in my case, my personal CDN), and achieve offline
 caching on my phone. To do this I've read some of the tutorials released by
 Google developer advocates and am roughly modeling HTML and JavaScript files-
-directly under `./` - after "[Service Worker Sample: Custom Offline Page
-Sample]{swsample}".
+directly under `./` - after {swsample}["Service Worker Sample: Custom Offline
+Page Sample"].
 
 [cols="2", options="header"]
 |===
