@@ -7,9 +7,12 @@ let setSelectMode = function (shouldSet) {
   document.body.setAttribute('data-study-mode', mode);
 };
 
+let studySectEl;
 window.onload = function () {
-  document
-      .querySelectorAll('#cards button.to-selection')[0]
+  studySectEl = document.querySelector('section#cards');
+
+  studySectEl
+      .querySelector('button.to-selection')
       .addEventListener('click', setSelectMode.bind(null /*this*/, true /*shouldSet*/));
 };
 
@@ -19,6 +22,7 @@ let launchStudyOf = function(studySet) {
   console.log(
       'TODO: figure out flashcard UI for "%s" set',
       studySet.id, studySet);
+  studySectEl.querySelector('h1').textContent = studySet.title;
 }
 
 let storageGetBlob = function(key) {
@@ -41,7 +45,7 @@ let refreshUi = function() {
     el.textContent = lastUrlsLen;
   });
 
-  let tblEl = document.querySelector('#sets table.selection');
+  let tblEl = document.querySelector('#sets table.selection tbody');
   urls['cards.index'].forEach(cardSet => {
     let set = {id: cardSet, url: 'cards/' + cardSet};
     ['title', 'description', 'index'].forEach(key => {
