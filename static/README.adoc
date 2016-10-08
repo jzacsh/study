@@ -34,7 +34,9 @@ Page Sample"].
 | this file                       | `./README.adoc`
 | main HTTP requests              | `./index.html`
 | main bootstrap/gluecode logic   | `./index.js`
-| service worker (network) logic  | `./worker.js`
+
+| service worker (network) logic & proactive cache primer
+| `./worker.js`
 
 | main studying UI & offline default landing page
 | `./study.html` _(`offline.html` in tutorials)_
