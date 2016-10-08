@@ -33,9 +33,7 @@ usageTip() (
 
 declare -r arg_cardDir="$1"
 { [[ -d "$arg_cardDir" ]] && [[ -w "$arg_cardDir" ]] && [[ -r "$arg_cardDir" ]]; } ||
-  usageTip \
-    'Flashcard DIR is not a readable, writeable directory. See --help for more.\n' \
-    "$arg_cardDir"
+  usageTip 'CARDS_DIR not a readable & writeable directory.\n' "$arg_cardDir"
 
 declare -r arg_title="$2"; [[ -n "${arg_title/ */}" ]] ||
   usageTip 'missing TITLE argument (got "%s")\n' "$arg_title"
