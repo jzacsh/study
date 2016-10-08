@@ -85,10 +85,14 @@ function refreshFlashcards(fileCache) {
                   let metadataUrl = cardSetUrl + '/' + metadata;
                   return fetch(metadataUrl).then(resp => {
                     return resp.text().then(body => {
-                      let content = body;
+                      let content;
                       if (metadata == 'index') {
                         content = parseIndexTxt(body);
                         cardIndex = content;
+                      } else {
+                        content = body
+                          .replace(/^\s*/, '')
+                          .replace(/\s*$/, '');
                       }
                       return installKeyVal(POST_CMDS.install, {url: metadataUrl, resp: content});
                     });
