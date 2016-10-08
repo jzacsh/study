@@ -7,23 +7,80 @@ let setSelectMode = function (shouldSet) {
   document.body.setAttribute('data-study-mode', mode);
 };
 
+let PREF_DEFAULTS = {
+  'flip_card': '1'
+}
+
 let studySectEl;
 window.onload = function () {
   studySectEl = document.querySelector('section#cards');
 
   studySectEl
-      .querySelector('button.to-selection')
+      .querySelector('nav button.to-selection')
       .addEventListener('click', setSelectMode.bind(null /*this*/, true /*shouldSet*/));
+
+  studySectEl
+      .querySelector('nav button.pref-flip')
+      .addEventListener('click', handleTogglePref);
+
+  studySectEl
+      .querySelector('button.reveal')
+      .addEventListener('click', handleRevealBack);
+
+  studySectEl
+      .querySelector('button.next')
+      .addEventListener('click', handleNextCardFront);
+
+  let pref = localStorage.getItem('prefs.FLIP_CARD');
+  if (!(pref && pref.length)) {
+    localStorage.setItem('prefs.FLIP_CARD',  PREF_DEFAULTS.flip_card);
+  }
 };
 
-let launchStudyOf = function(studySet) {
+let STUDY_STATE = {
+  front: 'front', // ONLY show the front of the card
+  back: 'back', // ONLY show the back of the card
+  both: 'both', // show BOTH sides of the card simultaneously
+};
+
+let handleLaunchStudyOf = function(studySet) {
   setSelectMode(false /*shouldSet*/);
+
+  studySectEl.querySelector('h1').textContent = studySet.title;
+  studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
 
   console.log(
       'TODO: figure out flashcard UI for "%s" set',
       studySet.id, studySet);
-  studySectEl.querySelector('h1').textContent = studySet.title;
+  let frontCardUrl = ''; /* TODO */
+  let backCardUrl = ''; /* TODO */
+
+  studySectEl.querySelector('img.front').setAttribute('src', frontCardUrl);
+  studySectEl.querySelector('img.back').setAttribute('src', backCardUrl);
 }
+
+let handleNextCardFront = function(event) {
+  // TODO: similar logic to above initial loading of set
+  console.log('noext-card logic not done!');
+};
+
+let handleTogglePref = function(event) {
+  let setTo = localStorage.getItem('prefs.FLIP_CARD');
+  if (!(setTo && setTo.length)) {
+    setTo = PREF_DEFAULTS.flip_card;
+  }
+
+  localStorage.setItem(
+      'prefs.FLIP_CARD',
+      Number(!parseInt(setTo, 10)));
+}
+
+let handleRevealBack = function(event) {
+  let shouldFlip = Boolean(parseInt(localStorage.getItem('prefs.FLIP_CARD'), 10));
+  studySectEl.setAttribute(
+      'data-study-state',
+      shouldFlip ? STUDY_STATE.back : STUDY_STATE.both);
+};
 
 let storageGetBlob = function(key) {
   let val = localStorage.getItem(key);
@@ -60,7 +117,7 @@ let refreshUi = function() {
     launchStudyButton.textContent = set.title;
     launchStudyButton.addEventListener(
         'click',
-        launchStudyOf.bind(null /*this*/, set));
+        handleLaunchStudyOf.bind(null /*this*/, set));
     tdTitle.appendChild(launchStudyButton);
     trEl.appendChild(tdTitle);
 
