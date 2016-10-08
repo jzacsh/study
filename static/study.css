@@ -3,3 +3,5 @@ body[data-study-mode="studying"] section#sets,
 body[data-study-mode="studying"] footer {
   display: none;
 }
+
+td { padding: 0.5ex; }
