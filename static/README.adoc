@@ -73,5 +73,5 @@ Said metadata for a set can be rewritten by hand, or with `../metadata-set.sh`.
 ==== New Sets
 To create a flashcard set quickly from screenshots, the shell script
 `../screenshot-pairs.sh` might help. Simpy create a new directory with a
-reasonable name under `./cards/`, as described above, and run the script from
-the new directory. See the script's help documentation for more.
+reasonable name under `./cards/` and run the script from the new directory. See
+the script's help documentation for more.
