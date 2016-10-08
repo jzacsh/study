@@ -31,14 +31,15 @@ Sample]{swsample}".
 | description                     | file
 
 | root of web app                 | `./`
+| this file                       | `./README.adoc`
 | main HTTP requests              | `./index.html`
+| main bootstrap/gluecode logic   | `./index.js`
+| service worker (network) logic  | `./worker.js`
 
 | main studying UI & offline default landing page
 | `./study.html` _(`offline.html` in tutorials)_
 
-| main JavaScript for webapp      | `./offline.js`
-| this file                       | `./README.adoc`
-| service worker JavaScript       | `./worker.js`
+| Flashcard studying UI logic     | `./study.js`
 | UTF-8 encoded metadata file     | `./cards.index`
 | root of all flashcards sets     | `./cards/`
 | example flashcard set           | `./cards/sampleset_calc/`
