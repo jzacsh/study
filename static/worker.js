@@ -90,9 +90,7 @@ function refreshFlashcards(fileCache) {
                         content = parseIndexTxt(body);
                         cardIndex = content;
                       } else {
-                        content = body
-                          .replace(/^\s*/, '')
-                          .replace(/\s*$/, '');
+                        content = body.trim();
                       }
                       return installKeyVal(POST_CMDS.install, {url: metadataUrl, resp: content});
                     });
