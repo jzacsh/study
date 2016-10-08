@@ -48,9 +48,8 @@ Page Sample"].
 | UTF-8 encoded metadata file     | `./cards/sampleset_calc/index`
 | UTF-8 encoded metadata file     | `./cards/sampleset_calc/title`
 | UTF-8 encoded metadata file     | `./cards/sampleset_calc/description`
-| sample flashcard                | `./cards/sampleset_calc/flashcard_01_back.png.webp`
-
-| same flashcard (but it's front) | `./cards/sampleset_calc/flashcard_01_front.png.webp`
+| sample flashcard, numbered one  | `./cards/sampleset_calc/flashcard_01_back.png.webp`
+| same card, but it's front       | `./cards/sampleset_calc/flashcard_01_front.png.webp`
 |===
 
 [[flashcards]]
