@@ -9,7 +9,10 @@ let CURRENT_CACHES = {
   offline: 'offline-v' + CACHE_VERSION
 };
 
-const POST_MESSAGE_CMD = 'INSTALL_URL';
+let POST_CMDS = {
+  install: 'INSTALL_URL',
+  primer: 'PRIMER_STATUS', // TODO emit different stages in `install` handler
+};
 const FLASHCARD_INDEXES = 'cards.index';
 const OFFLINE_URL = 'study.html'
 let OFFLINE_URL_DEPS = [
@@ -68,7 +71,7 @@ function refreshFlashcards(fileCache) {
     return resp.clone().text()
         .then(parseIndexTxt)
         .then(cardSets => {
-          return installKeyVal(POST_MESSAGE_CMD, {url: FLASHCARD_INDEXES, resp: cardSets})
+          return installKeyVal(POST_CMDS.install, {url: FLASHCARD_INDEXES, resp: cardSets})
               .then(_ => { return cardSets;});
         })
         .then(cardSets => {
@@ -87,7 +90,7 @@ function refreshFlashcards(fileCache) {
                         content = parseIndexTxt(body);
                         cardIndex = content;
                       }
-                      return installKeyVal(POST_MESSAGE_CMD, {url: metadataUrl, resp: content});
+                      return installKeyVal(POST_CMDS.install, {url: metadataUrl, resp: content});
                     });
                   });
                 };
