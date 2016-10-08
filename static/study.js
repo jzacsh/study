@@ -2,7 +2,11 @@
 
 let studySets = {};
 
-console.warn('study logic running... (TODO) NOT YET WRITTEN');
+let launchStudyOf = function(studySet) {
+  console.log(
+      'TODO: figure out flashcard UI for "%s" set',
+      studySet.id, studySet);
+}
 
 let storageGetBlob = function(key) {
   let val = localStorage.getItem(key);
@@ -24,18 +28,34 @@ let refreshUi = function() {
     el.textContent = lastUrlsLen;
   });
 
-  let ulEl = document.querySelector('ul#sets');
+  let tblEl = document.querySelector('table#sets');
   urls['cards.index'].forEach(cardSet => {
     let set = {id: cardSet, url: 'cards/' + cardSet};
     ['title', 'description', 'index'].forEach(key => {
       set[key] = urls[set.url + '/' + key];
     });
 
-    let li = document.createElement('li');
-    li.setAttribute('data-set-slug', set.id);
-    li.textContent = '"' + set.title + '" (' + set.index.length + ' cards)';
-    ulEl.appendChild(set.entryLiEl = li);
+    let trEl = document.createElement('tr');
+    trEl.setAttribute('data-set-slug', set.id);
 
+    let tdTitle = document.createElement('td');
+    let launchStudyButton = document.createElement('button');
+    launchStudyButton.textContent = set.title;
+    launchStudyButton.addEventListener(
+        'click',
+        launchStudyOf.bind(null /*this*/, set));
+    tdTitle.appendChild(launchStudyButton);
+    trEl.appendChild(tdTitle);
+
+    let tdSize = document.createElement('td');
+    tdSize.textContent = set.index.length;
+    trEl.appendChild(tdSize);
+
+    let tdDescription = document.createElement('td');
+    tdDescription.textContent = set.description;
+    trEl.appendChild(tdDescription);
+
+    tblEl.appendChild(set.entryTrEl = trEl);
     studySets[set.url] = set;
   });
 };
