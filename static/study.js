@@ -55,8 +55,8 @@ let handleLaunchStudyOf = function(studySet) {
   let frontCardUrl = ''; /* TODO */
   let backCardUrl = ''; /* TODO */
 
-  studySectEl.querySelector('img.front').setAttribute('src', frontCardUrl);
-  studySectEl.querySelector('img.back').setAttribute('src', backCardUrl);
+  studySectEl.querySelector('figure.front img').setAttribute('src', frontCardUrl);
+  studySectEl.querySelector('figure.back img').setAttribute('src', backCardUrl);
 }
 
 let handleNextCardFront = function(event) {
