@@ -2,7 +2,20 @@
 
 let studySets = {};
 
+let setSelectMode = function (shouldSet) {
+  let mode = shouldSet ? 'selection' : 'studying';
+  document.body.setAttribute('data-study-mode', mode);
+};
+
+window.onload = function () {
+  document
+      .querySelectorAll('#cards button.to-selection')[0]
+      .addEventListener('click', setSelectMode.bind(null /*this*/, true /*shouldSet*/));
+};
+
 let launchStudyOf = function(studySet) {
+  setSelectMode(false /*shouldSet*/);
+
   console.log(
       'TODO: figure out flashcard UI for "%s" set',
       studySet.id, studySet);
@@ -28,7 +41,7 @@ let refreshUi = function() {
     el.textContent = lastUrlsLen;
   });
 
-  let tblEl = document.querySelector('table#sets');
+  let tblEl = document.querySelector('#sets table.selection');
   urls['cards.index'].forEach(cardSet => {
     let set = {id: cardSet, url: 'cards/' + cardSet};
     ['title', 'description', 'index'].forEach(key => {

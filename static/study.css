@@ -1,0 +1,5 @@
+body[data-study-mode="selection"] section#cards,
+body[data-study-mode="studying"] section#sets,
+body[data-study-mode="studying"] footer {
+  visibility: hidden;
+}
