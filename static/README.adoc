@@ -12,7 +12,7 @@ design/intention.
 The files in this directory represent the root of this web application. The
 landing page is index.html. The page is a static web application with only
 JavaScript at play and pre-generated content _(via some shell scripts in
-`../../`)_.
+`../`)_.
 
 === Purpose
 The end-goal of this webapp is to facilitate offline display of front, then back
