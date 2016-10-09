@@ -16,6 +16,7 @@ let POST_CMDS = {
 const FLASHCARD_INDEXES = 'cards.index';
 const OFFLINE_URL = 'study.html'
 let OFFLINE_URL_DEPS = [
+  'study.css',
   'study.js',
   FLASHCARD_INDEXES
 ];
@@ -138,11 +139,16 @@ function refreshFlashcards(fileCache) {
                     metadataFetch('description'),
                   ]).
                   then(_ => {
-                    return Promise.all(cardIndex.map(card => {
-                      let cardUrl = cardSetUrl + '/' + card;
-                      return fetch(cardUrl).then(imgResp => {
-                        return fileCache.put(cardUrl, imgResp.clone());
-                      });
+                    return Promise.all(cardIndex.map(cardPair => {
+                      let cacheCard = function(cardUrl) {
+                        return fetch(cardUrl).then(imgResp => {
+                          return fileCache.put(cardUrl, imgResp.clone());
+                        });
+                      };
+                      return Promise.all([
+                        cacheCard(cardPair.front),
+                        cacheCard(cardPair.back),
+                      ]);
                     }));
                   });
               }));
@@ -188,19 +194,26 @@ self.addEventListener('activate', event => {
   );
 });
 
-self.addEventListener('fetch', event => {
-  // TODO fetch "accept...image" requests, and respondWith() corresponding
-  // webp's we already have in cache.
-
+let requestLooksLikePageNav = function(request) {
   // We only want to call event.respondWith() if this is a navigation request
   // for an HTML page.
   // request.mode of 'navigate' is unfortunately not supported in Chrome
   // versions older than 49, so we need to include a less precise fallback,
   // which checks for a GET request with an Accept: text/html header.
-  if (event.request.mode === 'navigate' || (
-        event.request.method === 'GET' &&
-        event.request.headers.get('accept').includes('text/html'))) {
-    console.log('Handling navigation-looking fetch event for URL: "%s"', event.request.url);
+  return request.mode === 'navigate' || (
+        request.method === 'GET' &&
+        request.headers.get('accept').includes('text/html'));
+};
+
+let requestLooksLikeImage = function(request) {
+  return Boolean(
+      request.method === 'GET' &&
+      request.headers.get('accept').match(/image\//)
+  );
+};
+
+self.addEventListener('fetch', event => {
+  if (requestLooksLikePageNav(event.request)) {
     event.respondWith(fetch(event.request).catch(error => {
       // The catch is only triggered if fetch() throws an exception which will
       // most likely happen due to the server being unreachable. If fetch()
@@ -211,6 +224,19 @@ self.addEventListener('fetch', event => {
       console.log('Fetch failed; returning offline page instead.', error);
       return caches.match(OFFLINE_URL);
     }));
+  } else if (requestLooksLikeImage(event.request)) {
+    return caches.open(CURRENT_CACHES.offline).then(function(rawUrl, openCache) {
+      return openCache.match(rawUrl.replace(location.origin + '/', ''));
+    }.bind(null /*this*/, event.request.url));
+
+    // TODO: fix and empower the offline-status dashbaord
+    //   normal behavior commented out belwo, but for now, we want to ONLY use
+    //   offline storage, unless prompted (ie: by user, to refresh)
+//  event.respondWith(fetch(event.request).catch(error => {
+//    console.log('Cached fetch of image failed; returning offline page instead.', error);
+//
+//    // TODO above in-use logic should live here
+//  }));
   }
 
   // If the above if() is false, then this fetch handler won't intercept the
