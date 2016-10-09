@@ -5,9 +5,14 @@ let setSelectMode = function (shouldSet) {
   document.body.setAttribute('data-study-mode', mode);
 };
 
-let PREF_DEFAULTS = {
-  'flip_card': '1'
-}
+let PREFS = {
+  flip_card: {Key: 'prefs.FLIP_CARD', Default: true},
+};
+
+// TODO write runtime assertion that these map back correctly
+let REVERSE_PREFS = {
+  'prefs.FLIP_CARD': 'flip_card',
+};
 
 // important global state needed by handlers
 let studySectEl;
@@ -63,13 +68,22 @@ class StudySetCtl {
 window.onload = function () {
   studySectEl = document.querySelector('section#cards');
 
+  let prefFlip = getBoolBitFromStorage(PREFS.flip_card.Key);
+  if (prefFlip === undefined) {
+    prefFlip = PREFS.flip_card.Default;
+  }
+
   studySectEl
       .querySelector('nav button.to-selection')
       .addEventListener('click', setSelectMode.bind(null /*this*/, true /*shouldSet*/));
 
-  studySectEl
-      .querySelector('nav button.pref-flip')
-      .addEventListener('click', handleTogglePref);
+  let prefFlipButtonEl = studySectEl.querySelector('nav button.pref-flip');
+  prefFlipButtonEl.addEventListener(
+      'click',
+      handleTogglePref.bind(null /*this*/, PREFS.flip_card.Key));
+
+  updatePrefTo(PREFS.flip_card.Key, prefFlip, prefFlipButtonEl);
+
 
   [
     studySectEl.querySelector('button.reveal'),
@@ -80,11 +94,19 @@ window.onload = function () {
   studySectEl
       .querySelector('button.next')
       .addEventListener('click', handleNextCardFront);
+};
 
-  let pref = localStorage.getItem('prefs.FLIP_CARD');
-  if (!(pref && pref.length)) {
-    localStorage.setItem('prefs.FLIP_CARD',  PREF_DEFAULTS.flip_card);
-  }
+/**
+ * @param {string} prefKey
+ * @param {boolean} setTo
+ * @param {!Element} statusParentEl
+ */
+let updatePrefTo = function(prefKey, setTo, statusParentEl) {
+  localStorage.setItem(prefKey, Number(setTo).toString());
+
+  statusParentEl
+      .querySelector('[data-status]')
+      .textContent = setTo ? 'on' : 'off';
 };
 
 let STUDY_STATE = {
@@ -93,6 +115,22 @@ let STUDY_STATE = {
   both: 'both', // show BOTH sides of the card simultaneously
 };
 
+let getBoolBitFromStorage = function(localStorageKey) {
+  let rawVal = localStorage.getItem(localStorageKey);
+  return rawVal ? Boolean(parseInt(rawVal, 10)) : undefined;
+};
+
+
+/**
+ * @param {string} prefKey
+ * @return {boolean} Stored preference, or its corresponding default
+ */
+let getPreference = function(prefKey) {
+  let storedVal = getBoolBitFromStorage(prefKey);
+  return storedVal === undefined ?
+      REVERSE_PREFS[PREFS[prefKey]].Default :
+      storedVal;
+};
 
 /**
  * @param {!Object} studySet
@@ -116,22 +154,14 @@ let handleNextCardFront = function(event) {
   studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
 };
 
-let handleTogglePref = function(event) {
-  let setTo = localStorage.getItem('prefs.FLIP_CARD');
-  if (!(setTo && setTo.length)) {
-    setTo = PREF_DEFAULTS.flip_card;
-  }
-
-  localStorage.setItem(
-      'prefs.FLIP_CARD',
-      Number(!parseInt(setTo, 10)));
+let handleTogglePref = function(prefKey, event) {
+  updatePrefTo(prefKey, !getPreference(prefKey), event.target);
 }
 
 let handleFlipCard = function(event) {
   let isFront = studySectEl.getAttribute('data-study-state') == STUDY_STATE.front;
   if (isFront) {
-    let shouldFlip = Boolean(parseInt(
-          localStorage.getItem('prefs.FLIP_CARD'), 10));
+    let shouldFlip = getPreference(PREFS.flip_card.Key);
     studySectEl.setAttribute(
         'data-study-state',
         shouldFlip ? STUDY_STATE.back : STUDY_STATE.both);
