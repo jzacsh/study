@@ -142,7 +142,7 @@ let handleLaunchStudyOf = function(studySet) {
   setSelectMode(false /*shouldSet*/);
 
   currentSet = studySet;
-  currentSet.ctl = new StudySetCtl(currentSet.index);
+  currentSet.ctl = currentSet.ctl || new StudySetCtl(currentSet.index);
 
   studySectEl.querySelector('h1').textContent = currentSet.title;
 
