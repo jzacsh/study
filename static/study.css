@@ -11,3 +11,27 @@ nav button {
 }
 
 td { padding: 0.5ex; }
+
+section#cards figcaption {
+  padding-top: 1ex;
+}
+
+section#cards figure {
+  margin-left: 0;
+  margin-right: 0;
+}
+section#cards figure img {
+  margin: 0 auto;
+  display: block;
+}
+
+section#cards figure.back img {
+  outline: 1px dotted #d45f73;
+}
+
+section#cards nav button {
+  margin-left: 1ex;
+}
+section#cards nav button:first-child {
+  margin-left: 0;
+}
