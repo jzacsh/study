@@ -23,6 +23,7 @@ section#cards figure {
 section#cards figure img {
   margin: 0 auto;
   display: block;
+  max-width: 100%;
 }
 
 section#cards figure.back img {
