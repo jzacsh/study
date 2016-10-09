@@ -66,6 +66,8 @@ class StudySetCtl {
 }
 
 window.onload = function () {
+  uiTick(performance.now());
+
   studySectEl = document.querySelector('section#cards');
 
   let prefFlip = getBoolBitFromStorage(PREFS.flip_card.Key);
@@ -178,7 +180,7 @@ let storageGetBlob = function(key) {
 };
 
 let lastUrlsLen = -1;
-let refreshUi = function() {
+let refreshDashboardUi = function() {
   let urls = storageGetBlob('URLS');
   if (!urls) {
     return;
@@ -225,7 +227,6 @@ let refreshUi = function() {
 };
 
 let uiTick = function(stamp /*DOMHighResTimeStamp*/) {
-  refreshUi();
+  refreshDashboardUi();
   window.requestAnimationFrame(uiTick);
 };
-uiTick(performance.now());
