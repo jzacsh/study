@@ -71,9 +71,11 @@ window.onload = function () {
       .querySelector('nav button.pref-flip')
       .addEventListener('click', handleTogglePref);
 
-  studySectEl
-      .querySelector('button.reveal')
-      .addEventListener('click', handleRevealBack);
+  [
+    studySectEl.querySelector('button.reveal'),
+    studySectEl.querySelector('section#cards figure.front img'),
+    studySectEl.querySelector('section#cards figure.back img'),
+  ].forEach(el => el.addEventListener('click', handleFlipCard));
 
   studySectEl
       .querySelector('button.next')
@@ -125,11 +127,19 @@ let handleTogglePref = function(event) {
       Number(!parseInt(setTo, 10)));
 }
 
-let handleRevealBack = function(event) {
-  let shouldFlip = Boolean(parseInt(localStorage.getItem('prefs.FLIP_CARD'), 10));
-  studySectEl.setAttribute(
-      'data-study-state',
-      shouldFlip ? STUDY_STATE.back : STUDY_STATE.both);
+let handleFlipCard = function(event) {
+  let isFront = studySectEl.getAttribute('data-study-state') == STUDY_STATE.front;
+  if (isFront) {
+    let shouldFlip = Boolean(parseInt(
+          localStorage.getItem('prefs.FLIP_CARD'), 10));
+    studySectEl.setAttribute(
+        'data-study-state',
+        shouldFlip ? STUDY_STATE.back : STUDY_STATE.both);
+  } else {
+    studySectEl.setAttribute(
+        'data-study-state',
+        STUDY_STATE.front);
+  }
 };
 
 let storageGetBlob = function(key) {
