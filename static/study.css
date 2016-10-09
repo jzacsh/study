@@ -39,5 +39,10 @@ section#cards nav button:first-child {
 
 section#cards nav.settings {
   padding: 0.5ex 0 2ex 0;
-  border-bottom: 1px dotted #999;
+}
+
+section#cards progress {
+  width: 100%;
+  height: 1ex;
+  border: none;
 }

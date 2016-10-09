@@ -34,14 +34,22 @@ let currentSet; // one of {@link studySets}'s values
 class StudySetCtl {
   /**
    * @param {!Array} a single {@link studySets} value's "index" field.
+   * @param {!Element} <progress> element representing state of this set
    */
-  constructor (setIndex) {
+  constructor (setIndex, progressEl) {
     this.setIndex = setIndex;
+    this.progressEl = progressEl;
     this.restart();
   }
 
   restart() {
     this.activeIdx = 0;
+    this.updateProgressUi();
+  }
+
+  updateProgressUi() {
+    this.progressEl.setAttribute('max', this.setIndex.length);
+    this.progressEl.setAttribute('value', this.activeIdx + 1);
   }
 
   nextCard() {
@@ -50,6 +58,7 @@ class StudySetCtl {
     } else {
       this.restart();
     }
+    this.progressEl.setAttribute('value', this.activeIdx + 1);
   }
 
   renderCurrentCard() {
@@ -85,7 +94,6 @@ window.onload = function () {
       handleTogglePref.bind(null /*this*/, PREFS.flip_card.Key));
 
   updatePrefTo(PREFS.flip_card.Key, prefFlip, prefFlipButtonEl);
-
 
   Array.from(studySectEl.querySelectorAll('button.reveal')).concat([
     studySectEl.querySelector('section#cards figure.front img'),
@@ -141,7 +149,11 @@ let handleLaunchStudyOf = function(studySet) {
   setSelectMode(false /*shouldSet*/);
 
   currentSet = studySet;
-  currentSet.ctl = currentSet.ctl || new StudySetCtl(currentSet.index);
+
+  currentSet.ctl = currentSet.ctl ||
+      new StudySetCtl(currentSet.index, studySectEl.querySelector('progress'));
+
+  currentSet.ctl.updateProgressUi();
 
   studySectEl.querySelector('h1').textContent = currentSet.title;
 
