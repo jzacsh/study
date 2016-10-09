@@ -58,7 +58,7 @@ let installKeyVal = function(cmd, payload) {
   });
 };
 
-let parseCardIndex = function(lines) {
+let parseCardIndex = function(lines, parentUrl) {
   lines.sort((a, b) => {
     const ignoreSideRegexp = /\b(front|back)\b/;
     let aSideless = a.replace(ignoreSideRegexp, '');
@@ -68,6 +68,8 @@ let parseCardIndex = function(lines) {
     }
     return aSideless < bSideless ? -1 : 1;
   });
+
+  let relCardToUrl = function(relUrl) { return parentUrl + '/' + relUrl; };
 
   return lines.reduce(function(accum, curVal, curIdx, lns) {
     if (!(curIdx % 2)) {
@@ -79,11 +81,11 @@ let parseCardIndex = function(lines) {
 
     let pair = {};
     if (a.match(/\bfront\b/)) {
-      pair.front = a;
-      pair.back = b;
+      pair.front = relCardToUrl(a);
+      pair.back = relCardToUrl(b);
     } else {
-      pair.front = b;
-      pair.back = a;
+      pair.front = relCardToUrl(b);
+      pair.back = relCardToUrl(a);
     }
 
     accum.push(pair);
@@ -120,7 +122,8 @@ function refreshFlashcards(fileCache) {
                     return resp.text().then(body => {
                       let content;
                       if (metadata == 'index') {
-                        content = cardIndex = parseCardIndex(parseIndexTxt(body));
+                        content = cardIndex = parseCardIndex(
+                            parseIndexTxt(body), cardSetUrl);
                       } else {
                         content = body.trim();
                       }
