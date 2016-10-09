@@ -69,11 +69,15 @@ window.onload = function () {
 
   navigator.serviceWorker.ready.then(function(reg) {
     document.querySelector('#refresh').addEventListener('click', function(sw, e) {
-      sw.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.unregister(); // from http://stackoverflow.com/a/33705250
-        }
-      });
+      sw.getRegistrations()
+        .then(function(registrations) {
+          for (let registration of registrations) {
+            registration.unregister(); // from http://stackoverflow.com/a/33705250
+          }
+        })
+        .then(function() {
+          location.href = location.toString();
+        });
     }.bind(null /*this*/, navigator.serviceWorker));
   });
 
