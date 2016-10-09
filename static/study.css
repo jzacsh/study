@@ -36,3 +36,8 @@ section#cards nav button {
 section#cards nav button:first-child {
   margin-left: 0;
 }
+
+section#cards nav.settings {
+  padding: 0.5ex 0 2ex 0;
+  border-bottom: 1px dotted #999;
+}

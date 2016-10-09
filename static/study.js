@@ -87,15 +87,14 @@ window.onload = function () {
   updatePrefTo(PREFS.flip_card.Key, prefFlip, prefFlipButtonEl);
 
 
-  [
-    studySectEl.querySelector('button.reveal'),
+  Array.from(studySectEl.querySelectorAll('button.reveal')).concat([
     studySectEl.querySelector('section#cards figure.front img'),
     studySectEl.querySelector('section#cards figure.back img'),
-  ].forEach(el => el.addEventListener('click', handleFlipCard));
+  ]).forEach(el => el.addEventListener('click', handleFlipCard));
 
-  studySectEl
-      .querySelector('button.next')
-      .addEventListener('click', handleNextCardFront);
+  Array
+      .from(studySectEl.querySelectorAll('button.next'))
+      .forEach(el => el.addEventListener('click', handleNextCardFront));
 };
 
 /**
