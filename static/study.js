@@ -1,7 +1,5 @@
 'use strict';
 
-let studySets = {};
-
 let setSelectMode = function (shouldSet) {
   let mode = shouldSet ? 'selection' : 'studying';
   document.body.setAttribute('data-study-mode', mode);
@@ -11,7 +9,44 @@ let PREF_DEFAULTS = {
   'flip_card': '1'
 }
 
+// important global state needed by handlers
 let studySectEl;
+// @type {!Object<string,
+//                {
+//                  id: string,
+//                  url: string,
+//                  title: string,
+//                  description: string,
+//                  index: !Array.<{front: string, back: string}>,
+//                  entryTrEl: !Element,
+//                  ctl: !StudySetCtl,
+//                }
+//               >
+//       }
+let studySets = {};
+let currentSet; // one of {@link studySets}'s values
+
+class StudySetCtl {
+  /**
+   * @param {!Array} a single {@link studySets} value's "index" field.
+   */
+  constructor (setIndex) {
+    this.setIndex = setIndex;
+  }
+
+  nextCard() {
+    console.warn('TODO next-card logic not done!');
+  }
+
+  renderCurrentCard() {
+    let frontCardUrl = ''; /* TODO */
+    let backCardUrl = ''; /* TODO */
+
+    studySectEl.querySelector('figure.front img').setAttribute('src', frontCardUrl);
+    studySectEl.querySelector('figure.back img').setAttribute('src', backCardUrl);
+  }
+}
+
 window.onload = function () {
   studySectEl = document.querySelector('section#cards');
 
@@ -43,25 +78,27 @@ let STUDY_STATE = {
   both: 'both', // show BOTH sides of the card simultaneously
 };
 
+
+/**
+ * @param {!Object} studySet
+ *     Single value described by {@link studySets}.
+ */
 let handleLaunchStudyOf = function(studySet) {
   setSelectMode(false /*shouldSet*/);
 
-  studySectEl.querySelector('h1').textContent = studySet.title;
+  currentSet = studySet;
+  currentSet.ctl = new StudySetCtl(currentSet.index);
+
+  studySectEl.querySelector('h1').textContent = currentSet.title;
+
   studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
-
-  console.log(
-      'TODO: figure out flashcard UI for "%s" set',
-      studySet.id, studySet);
-  let frontCardUrl = ''; /* TODO */
-  let backCardUrl = ''; /* TODO */
-
-  studySectEl.querySelector('figure.front img').setAttribute('src', frontCardUrl);
-  studySectEl.querySelector('figure.back img').setAttribute('src', backCardUrl);
+  currentSet.ctl.renderCurrentCard();
 }
 
 let handleNextCardFront = function(event) {
-  // TODO: similar logic to above initial loading of set
-  console.log('noext-card logic not done!');
+  currentSet.ctl.nextCard();
+  currentSet.ctl.renderCurrentCard();
+  studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
 };
 
 let handleTogglePref = function(event) {
