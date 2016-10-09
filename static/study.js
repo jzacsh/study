@@ -32,18 +32,31 @@ class StudySetCtl {
    */
   constructor (setIndex) {
     this.setIndex = setIndex;
+    this.restart();
+  }
+
+  restart() {
+    this.activeIdx = 0;
   }
 
   nextCard() {
-    console.warn('TODO next-card logic not done!');
+    if (this.activeIdx >= 0 && this.activeIdx < (this.setIndex.length - 1)) {
+      ++this.activeIdx;
+    } else {
+      this.restart();
+    }
   }
 
   renderCurrentCard() {
-    let frontCardUrl = ''; /* TODO */
-    let backCardUrl = ''; /* TODO */
+    let frontCardUrl = this.setIndex[this.activeIdx].front;
+    let backCardUrl = this.setIndex[this.activeIdx].back;
 
-    studySectEl.querySelector('figure.front img').setAttribute('src', frontCardUrl);
-    studySectEl.querySelector('figure.back img').setAttribute('src', backCardUrl);
+    studySectEl
+        .querySelector('figure.front img')
+        .setAttribute('src', frontCardUrl);
+    studySectEl
+        .querySelector('figure.back img')
+        .setAttribute('src', backCardUrl);
   }
 }
 
