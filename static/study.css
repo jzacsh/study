@@ -6,4 +6,8 @@ section#cards[data-study-state="back"] figure.front {
   display: none;
 }
 
+nav button {
+  font-variant: small-caps;
+}
+
 td { padding: 0.5ex; }
