@@ -16,6 +16,7 @@ let POST_CMDS = {
 const FLASHCARD_INDEXES = 'cards.index';
 const OFFLINE_URL = 'study.html'
 let OFFLINE_URL_DEPS = [
+  'index.css',
   'study.css',
   'study.js',
   FLASHCARD_INDEXES
@@ -194,54 +195,55 @@ self.addEventListener('activate', event => {
   );
 });
 
-let requestLooksLikePageNav = function(request) {
-  // We only want to call event.respondWith() if this is a navigation request
-  // for an HTML page.
-  // request.mode of 'navigate' is unfortunately not supported in Chrome
-  // versions older than 49, so we need to include a less precise fallback,
-  // which checks for a GET request with an Accept: text/html header.
-  return request.mode === 'navigate' || (
-        request.method === 'GET' &&
-        request.headers.get('accept').includes('text/html'));
-};
-
-let requestLooksLikeImage = function(request) {
-  return Boolean(
-      request.method === 'GET' &&
-      request.headers.get('accept').match(/image\//)
-  );
-};
-
 self.addEventListener('fetch', event => {
-  if (requestLooksLikePageNav(event.request)) {
-    event.respondWith(fetch(event.request).catch(error => {
-      // The catch is only triggered if fetch() throws an exception which will
-      // most likely happen due to the server being unreachable. If fetch()
-      // returns a valid HTTP response with a response code in 4xx or 5xx range,
-      // the catch() will NOT be called. If you need custom handling for said
-      // ranges, see
-      // https://github.com/GoogleChrome/samples/tree/gh-pages/service-worker/fallback-response
-      console.log('Fetch failed; returning offline page instead.', error);
-      return caches.match(OFFLINE_URL);
-    }));
-  } else if (requestLooksLikeImage(event.request)) {
-    return caches.open(CURRENT_CACHES.offline).then(function(rawUrl, openCache) {
-      return openCache.match(rawUrl.replace(location.origin + '/', ''));
-    }.bind(null /*this*/, event.request.url));
+  // Original if-block from forked demo code can be seen here as of
+  // 971147490359, on lines 216-227
 
-    // TODO: fix and empower the offline-status dashbaord
-    //   normal behavior commented out belwo, but for now, we want to ONLY use
-    //   offline storage, unless prompted (ie: by user, to refresh)
-//  event.respondWith(fetch(event.request).catch(error => {
-//    console.log('Cached fetch of image failed; returning offline page instead.', error);
-//
-//    // TODO above in-use logic should live here
-//  }));
+  let requestUrlToRelative = function(absUrl) {
+    return absUrl.replace(location.origin + '/', '');
+  };
+
+  let requestLooksLikeImage = function(request) {
+    return Boolean(
+        request.method === 'GET' &&
+        request.headers.get('accept').match(/image\//)
+    );
+  };
+
+  let requestLooksLikePageNav = function(request) {
+    // We only want to call event.respondWith() if this is a navigation request
+    // for an HTML page.
+    // request.mode of 'navigate' is unfortunately not supported in Chrome
+    // versions older than 49, so we need to include a less precise fallback,
+    // which checks for a GET request with an Accept: text/html header.
+    return request.mode === 'navigate' || (
+          request.method === 'GET' &&
+          request.headers.get('accept').includes('text/html'));
+  };
+
+  let isRequestToNavToOfflinePage = function(request) {
+    return Boolean(
+        requestLooksLikePageNav(request) &&
+        requestUrlToRelative(request.url) == OFFLINE_URL
+    );
+  };
+
+  // Default to offline (cached) response of:
+  // - offline-ready pages (and its immediate dependencies)
+  // - heavily used resources (eg: flashcard images)
+  if (isRequestToNavToOfflinePage(event.request) ||
+      OFFLINE_URL_DEPS.includes(requestUrlToRelative(event.request.url)) ||
+      requestLooksLikeImage(event.request)) {
+    return event.respondWith(
+        caches
+          .open(CURRENT_CACHES.offline)
+          .then(function(rawUrl, openCache) {
+            return openCache.match(requestUrlToRelative(rawUrl));
+          }.bind(null /*this*/, event.request.url))
+          .catch(function() {
+            // Attempt online requests *last*
+            return fetch(event.request);
+          }.bind(null /*this*/, event.request))
+    );
   }
-
-  // If the above if() is false, then this fetch handler won't intercept the
-  // request. If there are any other fetch handlers registered, they will get a
-  // chance to call event.respondWith(). If no fetch handlers call
-  // event.respondWith(), the request will be handled by the browser as if there
-  // were no service worker involvement.
 });
