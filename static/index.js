@@ -67,6 +67,16 @@ window.onload = function () {
 
   navigator.serviceWorker.register('worker.js');
 
+  navigator.serviceWorker.ready.then(function(reg) {
+    document.querySelector('#refresh').addEventListener('click', function(sw, e) {
+      sw.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister(); // from http://stackoverflow.com/a/33705250
+        }
+      });
+    }.bind(null /*this*/, navigator.serviceWorker));
+  });
+
   let uiTick = function(stamp /*DOMHighResTimeStamp*/) {
     refreshUi();
     window.requestAnimationFrame(uiTick);
