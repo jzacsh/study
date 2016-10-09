@@ -50,3 +50,8 @@ section#cards progress {
   height: 1ex;
   border: none;
 }
+
+section#sets td button {
+  padding: 1em;
+  font-weight: bold;
+}
