@@ -32,6 +32,10 @@ section#sets thead {
 
 section#sets td { padding: 0.5ex; }
 
+section#sets tbody td:nth-child(2) {
+  text-align: center;
+}
+
 section#cards figcaption {
   padding-top: 1ex;
 }
