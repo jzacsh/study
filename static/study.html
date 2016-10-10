@@ -3,12 +3,11 @@
     <title>Study Mode: Study Flashcard Offline</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="index.css" rel="stylesheet" type="text/css"><link>
     <link href="study.css" rel="stylesheet" type="text/css"><link>
   </head>
   <body data-study-mode="selection">
-    <section id="sets">
-      <h1><span data-qty-sets>0</span> Available Flashcard Sets</h1>
+    <section id="sets" class="study">
+      <h1><span data-qty-sets>0</span> Loaded Flashcard Sets</h1>
       <table class="selection">
         <thead>
           <td>Title</td>
@@ -20,7 +19,7 @@
       </table>
     </section>
 
-    <section id="cards">
+    <section id="cards" class="study">
       <nav class="settings">
         <button class="to-selection">&#x2190; back to sets</button>
         <button class="pref-flip">&#x2699; flipping: <span data-status></span></button>
@@ -51,17 +50,39 @@
       </nav>
     </section>
 
-    <footer>
-      <h1>About</h1>
-      <p>This is the offline flashcard UI. Anything you can already see here will
-      be available when you visit this page again offline.</p>
+    <section>
+      <h1>Settings</h1>
+      <button id="refresh">refresh caches</button>
 
-      <address>
-      Questions? Visit <a href="index.html">back home</a> for more, or
-        <a href="https://github.com/jzacsh/study/issues/new">give feedback</a>, or
-        contact <a href="https://j.zac.sh/">me via my homepage</a>.
-      </address>
-    </footer>
+      <h1>About</h1>
+      <p>Above are offline flashcard sets. Data seen here will be available when
+      you visit offline.</p>
+
+      <p>
+      This is a static single-page app that tries to load flashcards and
+      metadata, via service worker web APIs, for offline use.
+      <a href="https://j.zac.sh/">I</a>'ve written it with my phone in mind.
+      Site static contents, including flashcard layouts, is described in <a
+        href="https://github.com/jzacsh/study/blob/1c7c258983b/static/README.adoc#static-content-flashcards">
+      <code>static/README.adoc</code></a>.
+      </p>
+
+      <aside>
+        <h2>Source Code</h2>
+        <p>
+        You can read the sourcecode for this page, and some of the scripts to
+        generate the flashcards, at <a
+        href="https://github.com/jzacsh/study">https://github.com/jzacsh/study</a> or
+        clone directly via:
+        <code>git clone https://github.com/jzacsh/study.git</code>
+        </p>
+      </aside>
+
+      <footer>
+        Questions? <a href="https://github.com/jzacsh/study/issues/new">Give
+          feedback</a>, or contact <a href="https://j.zac.sh/">me directly</a>.
+      </footer>
+    </section>
 
     <script src="study.js"></script>
   </body>

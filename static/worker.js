@@ -16,7 +16,6 @@ let POST_CMDS = {
 const FLASHCARD_INDEXES = 'cards.index';
 const OFFLINE_URL = 'study.html'
 let OFFLINE_URL_DEPS = [
-  'index.css',
   'study.css',
   'study.js',
   FLASHCARD_INDEXES
