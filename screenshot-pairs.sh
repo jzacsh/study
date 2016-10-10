@@ -24,7 +24,7 @@ this="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"; declare -r this
   exit 1
 }
 
-i=0; n=${1:-i}; offset=${1:-''}
+i=0; n=${1:-$i}; offset=${1:-''}
 contrib() (
   local con=$n
   if [[ -n "${offset/ */}" ]];then con=$(( n - offset )); fi
