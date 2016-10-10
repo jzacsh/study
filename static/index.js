@@ -110,6 +110,12 @@ let serviceWorkerMessagHandler = function(event) {
 };
 
 window.onload = function () {
+  if (location.pathname == '/') {
+    // Force viewing of this app via a URL our service worker is easily
+    // comfortable with
+    location.pathname = '/index.html';
+  }
+
   if (!('serviceWorker' in navigator)) {
     let fatal = 'WTF is this browser? no service worker API found';
     alert(fatal);

@@ -220,29 +220,41 @@ self.addEventListener('fetch', event => {
           request.headers.get('accept').includes('text/html'));
   };
 
-  let isRequestToNavToOfflinePage = function(request) {
+  let isRequestToNavToOfflinePageOrItsDeps = function(request) {
+    let relativeUrl = requestUrlToRelative(request.url);
     return Boolean(
         requestLooksLikePageNav(request) &&
-        requestUrlToRelative(request.url) == OFFLINE_URL
-    );
+        relativeUrl == OFFLINE_URL
+    ) || OFFLINE_URL_DEPS.includes(relativeUrl);
   };
 
-  // Default to offline (cached) response of:
-  // - offline-ready pages (and its immediate dependencies)
-  // - heavily used resources (eg: flashcard images)
-  if (isRequestToNavToOfflinePage(event.request) ||
-      OFFLINE_URL_DEPS.includes(requestUrlToRelative(event.request.url)) ||
-      requestLooksLikeImage(event.request)) {
-    return event.respondWith(
-        caches
-          .open(CURRENT_CACHES.offline)
-          .then(function(rawUrl, openCache) {
-            return openCache.match(requestUrlToRelative(rawUrl));
-          }.bind(null /*this*/, event.request.url))
-          .catch(function() {
-            // Attempt online requests *last*
-            return fetch(event.request);
-          }.bind(null /*this*/, event.request))
-    );
+  let fetchFromCacheElseNetwork = function(request) {
+    return caches
+      .open(CURRENT_CACHES.offline)
+      .then(function(rawUrl, openCache) {
+        return openCache.match(requestUrlToRelative(rawUrl));
+      }.bind(null /*this*/, request.url))
+      .catch(_ => {
+        return fetch(request); // Attempt online requests *last*
+      })
+  };
+
+  let fetchFromNetworkElseCache = function(request) {
+    return fetch(request).catch(_ => { // Fallback to our caches
+      return caches
+        .open(CURRENT_CACHES.offline)
+        .then(function(openCache) {
+          return openCache.match(requestUrlToRelative(request.url));
+        });
+    });
+  };
+
+  // Priorities, based on usage:
+  // - network-first: offline pages (and immediate web dependencies)
+  // - offline-first: heavily used resources (eg: flashcard images)
+  if (requestLooksLikeImage(event.request)) {
+    return event.respondWith(fetchFromCacheElseNetwork(event.request));
+  } else if (isRequestToNavToOfflinePageOrItsDeps(event.request)) {
+    return event.respondWith(fetchFromNetworkElseCache(event.request));
   }
 });
