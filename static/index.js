@@ -231,7 +231,7 @@ window.onload = function () {
 let updatePrefTo = function(prefKey, setTo, statusParentEl) {
   localStorage.setItem(prefKey, Number(setTo).toString());
 
-  statusParentEl
+  PREFS[REVERSE_PREFS[prefKey]].ButtonEl
       .querySelector('[data-status]')
       .textContent = setTo ? 'on' : 'off';
 };
