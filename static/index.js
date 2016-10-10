@@ -125,6 +125,8 @@ window.onload = function () {
       .then(registrations => {
         refreshButtonEl.removeAttribute('disabled');
         refreshButtonEl.addEventListener('click', function(unregister, e) {
+          e.target.textContent = 'refreshing...';
+          e.target.setAttribute('disabled', '');
           return unregister()
               .then(_ => { return caches.keys(); })
               .then(cacheKeys => {
