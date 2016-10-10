@@ -263,9 +263,11 @@ let refreshDashboardUi = function() {
   }
   lastUrlsLen = Object.keys(urls).length;
 
-  document.querySelectorAll('[data-qty-sets]').forEach(el => {
-    el.textContent = lastUrlsLen;
-  });
+  if (urls['cards.index'] && urls['cards.index'].length) {
+    document.querySelectorAll('[data-qty-sets]').forEach(el => {
+      el.textContent = urls['cards.index'].length;
+    });
+  }
 
   let tblEl = document.querySelector('#sets table.selection tbody');
   urls['cards.index'].forEach(cardSet => {
