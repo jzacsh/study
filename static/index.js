@@ -45,25 +45,26 @@ class StudySetCtl {
   }
 
   restart() {
-    this.activeIdx = 0;
-    this.updateProgressUi();
-  }
-
-  updateProgressUi() {
-    this.progressEl.setAttribute('max', this.setIndex.length);
-    this.progressEl.setAttribute('value', this.activeIdx + 1);
-  }
-
-  nextCard() {
-    if (this.activeIdx >= 0 && this.activeIdx < (this.setIndex.length - 1)) {
-      ++this.activeIdx;
-    } else {
-      this.restart();
+    this.available = [];
+    for (let i = 0; i < this.setIndex.length; ++i) {
+      this.available.push(i);
     }
-    this.progressEl.setAttribute('value', this.activeIdx + 1);
+
+    if (getPreference(PREFS.shuffle.Key)) {
+      this.activeIdx = getRandomIntMoz(0, this.setIndex.length - 1);
+    } else {
+      this.activeIdx = 0;
+    }
+
+    this.render();
   }
 
-  renderCurrentCard() {
+  render() {
+    this.progressEl.setAttribute(
+        'max', this.setIndex.length);
+    this.progressEl.setAttribute(
+        'value', this.setIndex.length - this.available.length);
+
     let frontCardUrl = this.setIndex[this.activeIdx].front;
     let backCardUrl = this.setIndex[this.activeIdx].back;
 
@@ -73,8 +74,48 @@ class StudySetCtl {
     studySectEl
         .querySelector('figure.back img')
         .setAttribute('src', backCardUrl);
+
+    if (this.available.length === 1) {
+      PREFS.shuffle.ButtonEl.removeAttribute('disabled');
+    } else {
+      if (getPreference(PREFS.shuffle.Key)) {
+        PREFS.shuffle.ButtonEl.setAttribute('disabled', '');
+      } else {
+        PREFS.shuffle.ButtonEl.removeAttribute('disabled');
+      }
+    }
+  }
+
+  nextCard() {
+    if (this.available.length <= 1) {
+      this.restart();
+      return;
+    }
+
+    this.available = this.available.filter((idx, _) => idx != this.activeIdx);
+
+    if (getPreference(PREFS.shuffle.Key)) {
+      this.activeIdx = this.available[
+          getRandomIntMoz(0, this.available.length - 1)];
+    } else {
+      ++this.activeIdx;
+    }
+
+    this.render();
   }
 }
+
+/**
+ * Taken from mozilla wiki, nicely explained here:
+ * http://stackoverflow.com/a/1527820
+ *
+ * @param {number} min Lower-limit of return, inclusive
+ * @param {number} max Upper-limit of return, inclusive
+ * @return {number}
+ */
+let getRandomIntMoz = function(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
 let serviceWorkerMessagHandler = function(event) {
   let parseFromSwBlob = function(eventData) {
@@ -160,12 +201,12 @@ window.onload = function () {
       prefVal = pref.Default;
     }
 
-    let prefToggleButtonEl = studySectEl.querySelector(
+    PREFS[cssSuffix].ButtonEl = studySectEl.querySelector(
         'nav button.pref-' + cssSuffix);
-    prefToggleButtonEl.addEventListener(
+    PREFS[cssSuffix].ButtonEl.addEventListener(
         'click',
         handleTogglePref.bind(null /*this*/, pref.Key));
-    updatePrefTo(pref.Key, prefVal, prefToggleButtonEl);
+    updatePrefTo(pref.Key, prefVal, PREFS[cssSuffix].ButtonEl);
   });
 
   studySectEl
@@ -230,17 +271,14 @@ let handleLaunchStudyOf = function(studySet) {
   currentSet.ctl = currentSet.ctl ||
       new StudySetCtl(currentSet.index, studySectEl.querySelector('progress'));
 
-  currentSet.ctl.updateProgressUi();
-
   studySectEl.querySelector('h1').textContent = currentSet.title;
 
   studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
-  currentSet.ctl.renderCurrentCard();
+  currentSet.ctl.render();
 }
 
 let handleNextCardFront = function(event) {
   currentSet.ctl.nextCard();
-  currentSet.ctl.renderCurrentCard();
   studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
 };
 
