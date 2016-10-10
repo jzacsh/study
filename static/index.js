@@ -129,7 +129,7 @@ window.onload = function () {
           }
         })
         .then(function() {
-          location.href = location.toString();
+          location.reload(true /*forceReload*/);
         });
     }.bind(null /*this*/, navigator.serviceWorker));
   });
