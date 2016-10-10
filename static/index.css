@@ -61,6 +61,9 @@ section#cards nav.settings {
   padding: 0.5ex 0 2ex 0;
 }
 
+section#cards nav.settings button.pref .warning { display: none; }
+section#cards nav.settings button.pref[data-warning] .warning { display: inherit; }
+
 section#cards nav.settings button.pref [data-status] {
   font-weight: bold;
 }

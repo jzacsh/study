@@ -75,15 +75,29 @@ class StudySetCtl {
         .querySelector('figure.back img')
         .setAttribute('src', backCardUrl);
 
-    if (this.available.length === 1) {
-      PREFS.shuffle.ButtonEl.removeAttribute('disabled');
+    if (this._isMidSet() && getPreference(PREFS.shuffle.Key)) {
+      PREFS.shuffle.ButtonEl.setAttribute('data-warning', '');
     } else {
-      if (getPreference(PREFS.shuffle.Key)) {
-        PREFS.shuffle.ButtonEl.setAttribute('disabled', '');
-      } else {
-        PREFS.shuffle.ButtonEl.removeAttribute('disabled');
-      }
+      PREFS.shuffle.ButtonEl.removeAttribute('data-warning');
     }
+  }
+
+  _isAtStart() {
+    return this.available.length === this.setIndex.length;
+  }
+
+  _isMidSet() {
+    return this.available.length !== 1;
+  }
+
+  shuffleToggled() {
+    let wasShuffleOn = !getPreference(PREFS.shuffle.Key); // we run *post* toggle
+    if (this._isAtStart() || (this._isMidSet() && wasShuffleOn)) {
+      this.restart();
+      return;
+    }
+
+    this.render();
   }
 
   nextCard() {
@@ -283,7 +297,11 @@ let handleNextCardFront = function(event) {
 };
 
 let handleTogglePref = function(prefKey, event) {
-  updatePrefTo(prefKey, !getPreference(prefKey), event.target);
+  updatePrefTo(prefKey, !getPreference(prefKey));
+
+  if (prefKey == PREFS.shuffle.Key) {
+    currentSet.ctl.shuffleToggled();
+  }
 }
 
 let handleFlipCard = function(event) {
