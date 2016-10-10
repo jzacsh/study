@@ -255,10 +255,10 @@ let refreshDashboardUi = function() {
   if (!urls) {
     return;
   }
-  if (urls['cards.index'].length == lastUrlsLen) {
+  if (Object.keys(urls).length == lastUrlsLen) {
     return;
   }
-  lastUrlsLen = urls['cards.index'].length;
+  lastUrlsLen = Object.keys(urls).length;
 
   document.querySelectorAll('[data-qty-sets]').forEach(el => {
     el.textContent = lastUrlsLen;
@@ -267,9 +267,12 @@ let refreshDashboardUi = function() {
   let tblEl = document.querySelector('#sets table.selection tbody');
   urls['cards.index'].forEach(cardSet => {
     let set = {id: cardSet, url: 'cards/' + cardSet};
-    ['title', 'description', 'index'].forEach(key => {
+    for (let key of ['title', 'description', 'index']) {
       set[key] = urls[set.url + '/' + key];
-    });
+      if (!set[key]) {
+        return;
+      }
+    }
 
     let trEl = document.createElement('tr');
     trEl.setAttribute('data-set-slug', set.id);
