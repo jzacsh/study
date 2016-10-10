@@ -125,9 +125,16 @@ window.onload = function () {
       .then(registrations => {
         refreshButtonEl.removeAttribute('disabled');
         refreshButtonEl.addEventListener('click', function(unregister, e) {
-          return unregister().then(_ => {
-            location.reload(true /*forceReload*/);
-          });
+          return unregister()
+              .then(_ => { return caches.keys(); })
+              .then(cacheKeys => {
+                return Promise.all(cacheKeys.map(key => {
+                  return caches.delete(key);
+                }));
+              })
+              .then(_ => {
+                location.reload(true /*forceReload*/);
+              });
         }.bind(null /*this*/, _ => { return registrations.unregister(); }));
       });
 
