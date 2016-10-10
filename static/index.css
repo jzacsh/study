@@ -1,6 +1,7 @@
 section { text-align: center; }
 footer {
   padding-top: 1ex;
+  margin-top: 1em;
   border-top: 1px dotted #999;
 }
 
@@ -16,6 +17,7 @@ section#cards[data-study-state="back"] figure.front {
 body section.more {
   margin-top: 2em;
   border-top: 1px dotted #999;
+  text-align: left;
 }
 
 nav button {
