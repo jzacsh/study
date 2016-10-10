@@ -14,10 +14,10 @@ let POST_CMDS = {
   primer: 'PRIMER_STATUS', // TODO emit different stages in `install` handler
 };
 const FLASHCARD_INDEXES = 'cards.index';
-const OFFLINE_URL = 'study.html'
+const OFFLINE_URL = 'index.html'
 let OFFLINE_URL_DEPS = [
-  'study.css',
-  'study.js',
+  'index.css',
+  'index.js',
   FLASHCARD_INDEXES
 ];
 
