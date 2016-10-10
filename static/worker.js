@@ -206,7 +206,7 @@ self.addEventListener('fetch', event => {
   let requestLooksLikeImage = function(request) {
     return Boolean(
         request.method === 'GET' &&
-        request.headers.get('accept').match(/image\//)
+        request.headers.get('accept').match(/^image\//)
     );
   };
 
