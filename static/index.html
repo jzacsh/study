@@ -8,7 +8,9 @@
   <body data-study-mode="selection">
     <section id="sets" class="study">
       <h1><span data-qty-sets>0</span> Loaded Flashcard Sets</h1>
-      <table class="selection">
+      <p>Below are offline-first flashcard sets. Data seen here will be
+      available when you visit offline.</p>
+      <table class="selection" cellspacing="5pt">
         <thead>
           <td>Title</td>
           <td>Size</td>
@@ -55,9 +57,6 @@
       <button id="refresh">refresh caches</button>
 
       <h1>About</h1>
-      <p>Above are offline flashcard sets. Data seen here will be available when
-      you visit offline.</p>
-
       <p>
       This is a static single-page app that tries to load flashcards and
       metadata, via service worker web APIs, for offline use.
