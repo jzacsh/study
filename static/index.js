@@ -197,9 +197,8 @@ window.onload = function () {
                   return caches.delete(key);
                 }));
               })
-              .then(_ => {
-                location.reload(true /*forceReload*/);
-              });
+              .then(_ => localStorage.removeItem('URLS'))
+              .then(_ => location.reload(true /*forceReload*/));
         }.bind(null /*this*/, _ => { return registrations.unregister(); }));
       });
 
