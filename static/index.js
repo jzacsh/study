@@ -118,24 +118,18 @@ window.onload = function () {
 
   navigator.serviceWorker.addEventListener('message', serviceWorkerMessagHandler);
 
-  navigator.serviceWorker.register('worker.js');
-
   let refreshButtonEl = document.querySelector('#refresh');
   refreshButtonEl.setAttribute('disabled', '');
-  navigator.serviceWorker.ready.then(function(reg) {
-    refreshButtonEl.removeAttribute('disabled');
-    refreshButtonEl.addEventListener('click', function(sw, e) {
-      sw.getRegistrations()
-        .then(function(registrations) {
-          for (let registration of registrations) {
-            registration.unregister(); // from http://stackoverflow.com/a/33705250
-          }
-        })
-        .then(function() {
-          location.reload(true /*forceReload*/);
-        });
-    }.bind(null /*this*/, navigator.serviceWorker));
-  });
+  navigator.serviceWorker
+      .register('worker.js')
+      .then(registrations => {
+        refreshButtonEl.removeAttribute('disabled');
+        refreshButtonEl.addEventListener('click', function(unregister, e) {
+          return unregister().then(_ => {
+            location.reload(true /*forceReload*/);
+          });
+        }.bind(null /*this*/, _ => { return registrations.unregister(); }));
+      });
 
   uiTick(performance.now());
 
