@@ -120,8 +120,11 @@ window.onload = function () {
 
   navigator.serviceWorker.register('worker.js');
 
+  let refreshButtonEl = document.querySelector('#refresh');
+  refreshButtonEl.setAttribute('disabled', '');
   navigator.serviceWorker.ready.then(function(reg) {
-    document.querySelector('#refresh').addEventListener('click', function(sw, e) {
+    refreshButtonEl.removeAttribute('disabled');
+    refreshButtonEl.addEventListener('click', function(sw, e) {
       sw.getRegistrations()
         .then(function(registrations) {
           for (let registration of registrations) {
