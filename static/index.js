@@ -7,11 +7,13 @@ let setSelectMode = function (shouldSet) {
 
 let PREFS = {
   flip_card: {Key: 'prefs.FLIP_CARD', Default: true},
+  shuffle: {Key: 'prefs.SHUFFLE', Default: false},
 };
 
 // TODO write runtime assertion that these map back correctly
 let REVERSE_PREFS = {
   'prefs.FLIP_CARD': 'flip_card',
+  'prefs.SHUFFLE': 'shuffle',
 };
 
 // important global state needed by handlers
@@ -150,21 +152,25 @@ window.onload = function () {
 
   studySectEl = document.querySelector('section#cards');
 
-  let prefFlip = getBoolBitFromStorage(PREFS.flip_card.Key);
-  if (prefFlip === undefined) {
-    prefFlip = PREFS.flip_card.Default;
-  }
+  Object.keys(PREFS).forEach(cssSuffix => {
+    let pref = PREFS[cssSuffix];
+
+    let prefVal = getBoolBitFromStorage(pref.Key);
+    if (prefVal === undefined) {
+      prefVal = pref.Default;
+    }
+
+    let prefToggleButtonEl = studySectEl.querySelector(
+        'nav button.pref-' + cssSuffix);
+    prefToggleButtonEl.addEventListener(
+        'click',
+        handleTogglePref.bind(null /*this*/, pref.Key));
+    updatePrefTo(pref.Key, prefVal, prefToggleButtonEl);
+  });
 
   studySectEl
       .querySelector('nav button.to-selection')
       .addEventListener('click', setSelectMode.bind(null /*this*/, true /*shouldSet*/));
-
-  let prefFlipButtonEl = studySectEl.querySelector('nav button.pref-flip');
-  prefFlipButtonEl.addEventListener(
-      'click',
-      handleTogglePref.bind(null /*this*/, PREFS.flip_card.Key));
-
-  updatePrefTo(PREFS.flip_card.Key, prefFlip, prefFlipButtonEl);
 
   Array.from(studySectEl.querySelectorAll('button.reveal')).concat([
     studySectEl.querySelector('section#cards figure.front img'),

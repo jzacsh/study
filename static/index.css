@@ -61,7 +61,7 @@ section#cards nav.settings {
   padding: 0.5ex 0 2ex 0;
 }
 
-section#cards nav.settings button.pref-flip [data-status] {
+section#cards nav.settings button.pref [data-status] {
   font-weight: bold;
 }
 
