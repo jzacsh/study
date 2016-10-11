@@ -340,6 +340,9 @@ let refreshDashboardUi = function() {
   }
 
   let tblEl = document.querySelector('#sets table.selection tbody');
+  Array.from(tblEl.querySelectorAll('tr')).forEach(el => {
+    el.parentNode.removeChild(el);
+  });
   urls['cards.index'].forEach(cardSet => {
     let set = {id: cardSet, url: 'cards/' + cardSet};
     for (let key of ['title', 'description', 'index']) {
