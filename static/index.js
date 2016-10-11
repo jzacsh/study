@@ -379,6 +379,13 @@ let refreshDashboardUi = function() {
     trEl.appendChild(tdDescription);
 
     tblEl.appendChild(set.entryTrEl = trEl);
+
+    // TODO share code with worker.js and share "offline-v1" string
+    caches.open('offline-v1').then(function(s, c) {
+      return c.match(s.index[0].front).then(r => {
+        s.contentType = r.headers.get('content-type');
+      });
+    }.bind(null /*this*/, set));
     studySets[set.url] = set;
   });
 };
