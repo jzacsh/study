@@ -132,7 +132,8 @@ class StudySetCtl {
 }
 
 let conentTypeToKnownType = function(rawContentType) {
-  return rawContentType.match(/^\b(\w*)\/\w*\b/);
+  let matches = rawContentType.match(/^\b(\w*)\/\w*\b/);
+  return matches && matches.length ? matches[1] : null;
 };
 
 /**
@@ -397,13 +398,11 @@ let refreshDashboardUi = function() {
     // TODO share code with worker.js and share "offline-v1" string
     caches.open('offline-v1').then(function(s, c) {
       return c.match(s.index[0].front).then(r => {
-        let knownType = conentTypeToKnownType(r.headers.get('content-type'));
-        if (!knownType) {
+        s.contentType = conentTypeToKnownType(r.headers.get('content-type'));
+        if (!s.contentType) {
           // TODO: someway to message a problem
           s.contentType = r.headers.get('content-type');
-          return;
         }
-        s.contentType = knownType[1];
       });
     }.bind(null /*this*/, set));
     studySets[set.url] = set;
