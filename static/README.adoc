@@ -1,5 +1,6 @@
 = Documentation of this Webapp
 :swsample: https://googlechrome.github.io/samples/service-worker/custom-offline-page/
+:sortLogic: https://github.com/jzacsh/study/blob/dfe924b5e176/static/worker.js#L64-L71
 
 Technical documentation of the contents of this directory.
 
@@ -70,10 +71,13 @@ Flashcards are stored as descendents of `./cards/` of this root directory.
   This helps easily distinguish them from sibling <<metadata>> files
 . MUST be in pairs: for each card, there should be a corresponding reverse "side" +
   Ie.: a <<set>> must have an even number of flashcards.
-. Filename MUST contain Exactly One occurrence of the string `front` or `back`
+. Filename MUST contain Exactly one occurrence of the string `front` or `back`
 . Files content-type will be easily determined by serving infrastructure +
   Eg.: receiving JavaScript relies on the presence of a correct `content-type`
   HTTP header.
+. No assuption is made about filename (other than above points)
+  footnoteref:[sort, For example sort order of flashcards is driven by
+  `String.prototype.sort` - eg: {sortLogic}]
 
 [[set]]
 === Sets
