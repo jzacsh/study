@@ -58,7 +58,7 @@ class StudySetCtl {
     }
 
     if (getPreference(PREFS.shuffle.Key)) {
-      this.activeIdx = getRandomIntMoz(0, this.setIndex.length - 1);
+      this.activeIdx = StudySetCtl.getRandomIntMoz_(0, this.setIndex.length - 1);
     } else {
       this.activeIdx = 0;
     }
@@ -149,26 +149,25 @@ class StudySetCtl {
 
     if (getPreference(PREFS.shuffle.Key)) {
       this.activeIdx = this.available[
-          getRandomIntMoz(0, this.available.length - 1)];
+          StudySetCtl.getRandomIntMoz_(0, this.available.length - 1)];
     } else {
       ++this.activeIdx;
     }
 
     this.render();
   }
+  /**
+   * Taken from mozilla wiki, nicely explained here:
+   * http://stackoverflow.com/a/1527820
+   *
+   * @param {number} min Lower-limit of return, inclusive
+   * @param {number} max Upper-limit of return, inclusive
+   * @return {number}
+   */
+  static getRandomIntMoz_(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 }
-
-/**
- * Taken from mozilla wiki, nicely explained here:
- * http://stackoverflow.com/a/1527820
- *
- * @param {number} min Lower-limit of return, inclusive
- * @param {number} max Upper-limit of return, inclusive
- * @return {number}
- */
-let getRandomIntMoz = function(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
 
 let serviceWorkerMessagHandler = function(event) {
   let parseFromSwBlob = function(eventData) {
