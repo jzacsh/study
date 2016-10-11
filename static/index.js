@@ -190,6 +190,11 @@ window.onload = function () {
         refreshButtonEl.addEventListener('click', function(unregister, e) {
           e.target.textContent = 'refreshing...';
           e.target.setAttribute('disabled', '');
+
+          // TODO: before unregistering, first postMessage and have REFRESH
+          // logic take place ServiceWorker's side; currently failing to get a
+          // non null "controller" property on:
+          //     navigator.serviceWorker.controller.postMessage('REFRESH');
           return unregister()
               .then(_ => { return caches.keys(); })
               .then(cacheKeys => {

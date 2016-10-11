@@ -12,6 +12,7 @@ let CURRENT_CACHES = {
 let POST_CMDS = {
   install: 'INSTALL_URL',
   primer: 'PRIMER_STATUS', // TODO emit different stages in `install` handler
+  error: 'ERROR',
 };
 const FLASHCARD_INDEXES = 'cards.index';
 const OFFLINE_URL = 'index.html'
@@ -192,6 +193,23 @@ self.addEventListener('activate', event => {
       );
     })
   );
+});
+
+self.addEventListener('message', event => {
+  if (!(event.data.cmd && event.data.cmd.length)) {
+    return; // we do not recognize the event
+  }
+
+  switch (event.data.cmd) {
+    case REFRESH:
+      console.warn('unregistering self');
+      return self.registration.unregister();
+      break;
+    default:
+      event.waitUntil(installKeyVal(POST_CMDS.error,
+          'Unrecognized command, "' + event.data.cmd + '"'));
+      break;
+  }
 });
 
 self.addEventListener('fetch', event => {
