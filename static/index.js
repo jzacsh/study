@@ -45,6 +45,12 @@ class StudySetCtl {
     this.restart();
   }
 
+  get ready() {
+    return Promise.all([
+      this.getContentType(),
+    ]).then(_ => { return this; });
+  }
+
   restart() {
     this.available = [];
     for (let i = 0; i < this.setIndex.length; ++i) {
@@ -326,20 +332,21 @@ let getPreference = function(prefKey) {
  * @param {!Object} studySet
  *     Single value described by {@link studySets}.
  */
-let handleLaunchStudyOf = function(studySet) {
+let handleLaunchStudyOf = function(studySet, event) {
   setSelectMode(false /*shouldSet*/);
 
   currentSet = studySet;
   currentSet.ctl = currentSet.ctl || new StudySetCtl(
       currentSet.index,
       studySectEl.querySelector('progress'));
+  currentSet.ctl.ready.then(_ => {
+    studySectEl.querySelector('h1').textContent = currentSet.title;
 
-  studySectEl.querySelector('h1').textContent = currentSet.title;
-
-  currentSet.getContentType()
-      .then(type => studySectEl.setAttribute('data-content-type', type));
-  studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
-  currentSet.ctl.render();
+    currentSet.ctl.getContentType()
+        .then(type => studySectEl.setAttribute('data-content-type', type));
+    studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
+    currentSet.ctl.render();
+  });
 }
 
 let handleNextCardFront = function(event) {
