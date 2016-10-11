@@ -205,6 +205,11 @@ window.onload = function () {
       .then(registrations => {
         refreshButtonEl.removeAttribute('disabled');
         refreshButtonEl.addEventListener('click', function(unregister, e) {
+          if (!navigator.onLine &&
+              !window.confirm("Are you sure? NO network to reload with, you'll break the app for now!")) {
+            return;
+          }
+
           e.target.textContent = 'refreshing...';
           e.target.setAttribute('disabled', '');
 
@@ -256,6 +261,14 @@ window.onload = function () {
   Array
       .from(studySectEl.querySelectorAll('button.next'))
       .forEach(el => el.addEventListener('click', handleNextCardFront));
+
+  let uiShowIsOnline = function(targetEls) {
+    targetEls.forEach(
+        e => e.setAttribute('data-network', navigator.onLine ? 'on' : 'off'));
+  }.bind(null /*this*/, [document.body]);
+  uiShowIsOnline(); // run at least once
+  window.addEventListener('online', uiShowIsOnline);
+  window.addEventListener('offline', uiShowIsOnline);
 };
 
 /**

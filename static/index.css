@@ -131,3 +131,13 @@ section#settings table tbody tr:last-child td:nth-child(2) {
 
 /* Toggle-warnings are never relevant on the dashboard */
 section#settings button.pref .warning { display: none; }
+
+[data-network="on"] .network-offline { display: none; }
+[data-network="off"] .network-online { display: none; }
+.network-status { padding: 0.5ex; }
+.network-status.network-online {
+  background-color: #b8ee92;
+}
+.network-status.network-offline {
+  background-color: #ffa274;
+}
