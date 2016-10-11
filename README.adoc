@@ -1,5 +1,5 @@
 = study tools
-:personalUse: https://static.j.zac.sh/
+:personalUse: https://study.j.zac.sh/
 :staticReadme: link:static/README.adoc
 
 Static client-side, offline-first webapp to display flashcard files.
