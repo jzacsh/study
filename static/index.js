@@ -345,11 +345,6 @@ let handleFlipCard = function(event) {
   }
 };
 
-let storageGetBlob = function(key) {
-  let val = localStorage.getItem(key);
-  return Boolean(val && val.length) ? JSON.parse(val) : null;
-};
-
 let lastUrlsEntry = '';
 let refreshDashboardUi = function() {
   let urls = localStorage.getItem('URLS');
