@@ -11,6 +11,7 @@ footer {
 
 body[data-study-mode="selection"] section#cards,
 body[data-study-mode="studying"] section#sets,
+body[data-study-mode="studying"] section#settings,
 body[data-study-mode="studying"] section.more,
 body[data-study-mode="studying"] footer,
 section#cards[data-study-state="front"] figure.back,
