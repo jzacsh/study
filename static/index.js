@@ -322,16 +322,16 @@ let storageGetBlob = function(key) {
   return Boolean(val && val.length) ? JSON.parse(val) : null;
 };
 
-let lastUrlsLen = -1;
+let lastUrlsEntry = '';
 let refreshDashboardUi = function() {
   let urls = storageGetBlob('URLS');
   if (!urls) {
     return;
   }
-  if (Object.keys(urls).length == lastUrlsLen) {
+  if (urls == lastUrlsEntry) {
     return;
   }
-  lastUrlsLen = Object.keys(urls).length;
+  lastUrlsEntry = urls;
 
   if (urls['cards.index'] && urls['cards.index'].length) {
     document.querySelectorAll('[data-qty-sets]').forEach(el => {
