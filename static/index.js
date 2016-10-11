@@ -118,20 +118,20 @@ class StudySetCtl {
       });
     }
 
-    if (this._isMidSet() && getPreference(PREFS.shuffle.Key)) {
+    if (this.isMidSet_() && getPreference(PREFS.shuffle.Key)) {
       PREFS.shuffle.Buttons.forEach(e => e.setAttribute('data-warning', ''));
     } else {
       PREFS.shuffle.Buttons.forEach(e => e.removeAttribute('data-warning'));
     }
   }
 
-  _isAtStart() { return this.available.length === this.setIndex.length; }
+  isAtStart_() { return this.available.length === this.setIndex.length; }
 
-  _isMidSet() { return this.available.length !== 1; }
+  isMidSet_() { return this.available.length !== 1; }
 
   shuffleToggled() {
     let wasShuffleOn = !getPreference(PREFS.shuffle.Key); // we run *post* toggle
-    if (this._isAtStart() || (this._isMidSet() && wasShuffleOn)) {
+    if (this.isAtStart_() || (this.isMidSet_() && wasShuffleOn)) {
       this.restart();
       return;
     }
