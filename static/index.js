@@ -92,9 +92,9 @@ class StudySetCtl {
     }
 
     if (this._isMidSet() && getPreference(PREFS.shuffle.Key)) {
-      PREFS.shuffle.ButtonEl.setAttribute('data-warning', '');
+      PREFS.shuffle.Buttons.forEach(e => e.setAttribute('data-warning', ''));
     } else {
-      PREFS.shuffle.ButtonEl.removeAttribute('data-warning');
+      PREFS.shuffle.Buttons.forEach(e => e.removeAttribute('data-warning'));
     }
   }
 
@@ -236,12 +236,12 @@ window.onload = function () {
       prefVal = pref.Default;
     }
 
-    PREFS[cssSuffix].ButtonEl = studySectEl.querySelector(
-        'nav button.pref-' + cssSuffix);
-    PREFS[cssSuffix].ButtonEl.addEventListener(
+    PREFS[cssSuffix].Buttons = Array.from(document.querySelectorAll(
+        'button.pref-' + cssSuffix));
+    PREFS[cssSuffix].Buttons.forEach(e => e.addEventListener(
         'click',
-        handleTogglePref.bind(null /*this*/, pref.Key));
-    updatePrefTo(pref.Key, prefVal, PREFS[cssSuffix].ButtonEl);
+        handleTogglePref.bind(null /*this*/, pref.Key)));
+    updatePrefTo(pref.Key, prefVal);
   });
 
   studySectEl
@@ -261,14 +261,13 @@ window.onload = function () {
 /**
  * @param {string} prefKey
  * @param {boolean} setTo
- * @param {!Element} statusParentEl
  */
-let updatePrefTo = function(prefKey, setTo, statusParentEl) {
+let updatePrefTo = function(prefKey, setTo) {
   localStorage.setItem(prefKey, Number(setTo).toString());
 
-  PREFS[REVERSE_PREFS[prefKey]].ButtonEl
-      .querySelector('[data-status]')
-      .textContent = setTo ? 'on' : 'off';
+  PREFS[REVERSE_PREFS[prefKey]].Buttons.forEach(e => {
+    e.querySelector('[data-status]').textContent = setTo ? 'on' : 'off';
+  });
 };
 
 let STUDY_STATE = {
@@ -302,7 +301,6 @@ let handleLaunchStudyOf = function(studySet) {
   setSelectMode(false /*shouldSet*/);
 
   currentSet = studySet;
-
   currentSet.ctl = currentSet.ctl || new StudySetCtl(
       currentSet.index,
       currentSet.contentType,

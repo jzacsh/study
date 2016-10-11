@@ -20,14 +20,18 @@ body section.more {
   text-align: left;
 }
 
-nav button {
+button.pref,
+section#cards nav button {
+  font-variant: small-caps;
+}
+
+thead {
+  font-weight: bold;
   font-variant: small-caps;
 }
 
 section#sets thead {
-  font-weight: bold;
   text-align: center;
-  font-variant: small-caps;
 }
 
 section#sets td { padding: 0.5ex; }
@@ -87,7 +91,7 @@ section#cards nav.settings {
 section#cards nav.settings button.pref .warning { display: none; }
 section#cards nav.settings button.pref[data-warning] .warning { display: inherit; }
 
-section#cards nav.settings button.pref [data-status] {
+button.pref [data-status] {
   font-weight: bold;
 }
 
@@ -101,3 +105,27 @@ section#sets td button {
   padding: 1em;
   font-weight: bold;
 }
+
+section#settings {
+  margin-top: 1em;
+  border-top: 1px dotted #999;
+}
+section#settings table thead {
+  text-align: center;
+  background-color: #eee;
+}
+section#settings table tbody { text-align: left; }
+section#settings table tbody td:first-child { text-align: right; }
+section#settings table tbody td {
+  padding: 1ex;
+}
+
+section#settings table tbody td:nth-child(2) {
+  border-bottom: 1px dotted #999;
+}
+section#settings table tbody tr:last-child td:nth-child(2) {
+  border-bottom: none;
+}
+
+/* Toggle-warnings are never relevant on the dashboard */
+section#settings button.pref .warning { display: none; }

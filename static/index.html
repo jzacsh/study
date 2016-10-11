@@ -52,6 +52,51 @@
       </nav>
     </section>
 
+    <section id="settings">
+      <h1>Settings</h1>
+      <table>
+        <thead>
+          <td>Setting</td>
+          <td>Description</td>
+        </thead>
+        <tbody cellspacing="3">
+          <tr>
+            <td>
+              <button class="pref pref-flip_card">&#x2699;&nbsp;flipping:&nbsp;<span data-status></span></button>
+            </td>
+            <td>
+              <p>
+              Mimick physical cards, by flipping them over when showing the
+              back. Otherwise, shows back and front simultaneously, upon reveal.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button class="pref pref-shuffle">&#128256;&nbsp;<span data-status></span>&nbsp;<span class="warning">&#9888;<span></button>
+            </td>
+            <td>
+            <p>
+              Shuffle order of cards' presentation when studying them,
+              displaying them in a random order instead.
+            </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button id="refresh">Delete Caches & Reload </button>
+            </td>
+            <td>
+            <p>
+            Best effort to clear local caches of flashcards and reload everything from server.
+            </p>
+            <p><strong>Warning</strong>: Only click if network is available.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
     <section class="more">
       <h1>About</h1>
       <p>
@@ -73,9 +118,6 @@
         </p>
         <p><code>git clone https://github.com/jzacsh/study.git</code></p>
       </aside>
-
-      <h1>Settings</h1>
-      <button id="refresh">Delete Caches & Reload </button>
 
       <footer>
         Questions? <a href="https://github.com/jzacsh/study/issues/new">Give
