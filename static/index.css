@@ -1,4 +1,8 @@
-section { text-align: center; }
+section {
+  text-align: center;
+  border-top: 1px dotted #999;
+}
+section:first-child { border-top: none; }
 footer {
   padding-top: 1ex;
   margin-top: 1em;
@@ -16,7 +20,6 @@ section#cards[data-study-state="back"] figure.front {
 
 body section.more {
   margin-top: 2em;
-  border-top: 1px dotted #999;
   text-align: left;
 }
 
@@ -108,7 +111,6 @@ section#sets td button {
 
 section#settings {
   margin-top: 1em;
-  border-top: 1px dotted #999;
 }
 section#settings table thead {
   text-align: center;
