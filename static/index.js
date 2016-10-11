@@ -329,14 +329,15 @@ let storageGetBlob = function(key) {
 
 let lastUrlsEntry = '';
 let refreshDashboardUi = function() {
-  let urls = storageGetBlob('URLS');
-  if (!urls) {
+  let urls = localStorage.getItem('URLS');
+  if (!(urls && urls.length)) {
     return;
   }
   if (urls == lastUrlsEntry) {
     return;
   }
   lastUrlsEntry = urls;
+  urls = JSON.parse(urls);
 
   if (urls['cards.index'] && urls['cards.index'].length) {
     document.querySelectorAll('[data-qty-sets]').forEach(el => {
