@@ -26,7 +26,6 @@ let studySectEl;
 //                  description: string,
 //                  index: !Array.<{front: string, back: string}>,
 //                  entryTrEl: !Element,
-//                  contentType: string,
 //                  ctl: !StudySetCtl,
 //                }
 //               >
@@ -37,12 +36,11 @@ let currentSet; // one of {@link studySets}'s values
 class StudySetCtl {
   /**
    * @param {!Array} a single {@link studySets} value's "index" field.
-   * @param {string} contentType Raw value of the HTTP header "content-type"
    * @param {!Element} <progress> element representing state of this set
    */
-  constructor (setIndex, contentType, progressEl) {
+  constructor (setIndex, progressEl) {
     this.setIndex = setIndex;
-    this.contentType = contentType;
+    this.contentType_ = null;
     this.progressEl = progressEl;
     this.restart();
   }
@@ -59,8 +57,31 @@ class StudySetCtl {
       this.activeIdx = 0;
     }
 
+    this.getContentType();
     this.render();
   }
+
+  getContentType() {
+    if (this.contentType_) {
+      return Promise.resolve(this.contentType_);
+    }
+
+    // TODO share code with worker.js and share "offline-v1" string
+    return caches
+        .open('offline-v1')
+        .then(c => c.match(this.setIndex[0].front))
+        .then(match => {
+          let header = match.headers.get('content-type');
+          // TODO: someway to message a problem
+          this.contentType_ = StudySetCtl.conentTypeToKnownType_(header) || header;
+          return Promise.resolve(this.contentType_);
+        });
+  }
+
+  static conentTypeToKnownType_(rawContentType) {
+    let matches = rawContentType.match(/^\b(\w*)\/\w*\b/);
+    return matches && matches.length ? matches[1] : null;
+  };
 
   render() {
     this.progressEl.setAttribute(
@@ -71,14 +92,14 @@ class StudySetCtl {
     let frontCardUrl = this.setIndex[this.activeIdx].front;
     let backCardUrl = this.setIndex[this.activeIdx].back;
 
-    if (this.contentType == 'image') {
+    if (this.contentType_ == 'image') {
       studySectEl
           .querySelector('figure.front img.card')
           .setAttribute('src', frontCardUrl);
       studySectEl
           .querySelector('figure.back img.card')
           .setAttribute('src', backCardUrl);
-    } else if (this.contentType == 'text') {
+    } else if (this.contentType_ == 'text') {
       fetch(frontCardUrl).then(r => r.text()).then(txt => {
         studySectEl
             .querySelector('figure.front p.card')
@@ -130,11 +151,6 @@ class StudySetCtl {
     this.render();
   }
 }
-
-let conentTypeToKnownType = function(rawContentType) {
-  let matches = rawContentType.match(/^\b(\w*)\/\w*\b/);
-  return matches && matches.length ? matches[1] : null;
-};
 
 /**
  * Taken from mozilla wiki, nicely explained here:
@@ -316,12 +332,12 @@ let handleLaunchStudyOf = function(studySet) {
   currentSet = studySet;
   currentSet.ctl = currentSet.ctl || new StudySetCtl(
       currentSet.index,
-      currentSet.contentType,
       studySectEl.querySelector('progress'));
 
   studySectEl.querySelector('h1').textContent = currentSet.title;
 
-  studySectEl.setAttribute('data-content-type', currentSet.contentType);
+  currentSet.getContentType()
+      .then(type => studySectEl.setAttribute('data-content-type', type));
   studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
   currentSet.ctl.render();
 }
@@ -406,16 +422,6 @@ let refreshDashboardUi = function() {
 
     tblEl.appendChild(set.entryTrEl = trEl);
 
-    // TODO share code with worker.js and share "offline-v1" string
-    caches.open('offline-v1').then(function(s, c) {
-      return c.match(s.index[0].front).then(r => {
-        s.contentType = conentTypeToKnownType(r.headers.get('content-type'));
-        if (!s.contentType) {
-          // TODO: someway to message a problem
-          s.contentType = r.headers.get('content-type');
-        }
-      });
-    }.bind(null /*this*/, set));
     studySets[set.url] = set;
   });
 };
