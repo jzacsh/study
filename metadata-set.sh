@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-declare -r flashcardRegexp='flashcard*.webp'
+declare -r flashcardRegexp='*.*'
 this="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"; declare -r this
 usage() (
   printf 'USAGE: `%s CARDS_DIR [TITLE DESCRIPTION]`
