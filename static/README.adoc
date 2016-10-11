@@ -4,9 +4,9 @@
 Technical documentation of the contents of this directory.
 
 == Status
-This document is being written *as* I'm writing the webapp, so things here will
-likely be incorrect. As of this writing, this is more documentation on
-design/intention.
+[horizontal]
+Document:: Up to date as of 2016-10-11
+Test Coverage:: None
 
 == Overview
 The files in this directory represent the root of this web application. The
@@ -16,33 +16,41 @@ JavaScript at play and pre-generated content _(via some shell scripts in
 
 === Purpose
 The end-goal of this webapp is to facilitate offline display of front, then back
-of <<flashcards>> (webp images) on a phone, without an internet connection.
+of <<flashcards>> (webp images, and now UTF8 encoded `.txt` files) on a phone,
+without an internet connection.
 
 == Architecture
-Currently planning to use latest service worker APIs to serve the app out of
-plain static file servers (in my case, my personal CDN), and achieve offline
-caching on my phone. To do this I've read some of the tutorials released by
-Google developer advocates and am roughly modeling HTML and JavaScript files-
-directly under `./` - after {swsample}["Service Worker Sample: Custom Offline
-Page Sample"].
+Using the latest `ServiceWorker` APIs to serve the app out of plain static file
+servers (in my case, my personal CDN), and achieve offline caching on my phone.
+
+To do this I read some of the tutorials released by Google developer
+advocates and initially modeled HTML and JavaScript files - directly under
+`./` - after {swsample}["Service Worker Sample: Custom Offline Page Sample"].
+I'm definitely not making best use of communication between client (the web
+page) and worker (the background JS doing the caching).
 
 [cols="2", options="header"]
 |===
 | description                     | file
 
+| some scripts to help generate flashcard files under `./cards/`
+| `../*.sh`
 | root of web app                 | `./`
 | this file                       | `./README.adoc`
-| main HTTP requests              | `./index.html`
-| main bootstrap/gluecode logic   | `./index.js`
+
+| main UI logic and service worker installation
+| `./index.js`
 
 | service worker (network) logic & proactive cache primer
 | `./worker.js`
 
-| main studying UI & offline default landing page
-| `./study.html` _(`offline.html` in tutorials)_
+| main studying UI & dashboard
+| `./index.html` _(`offline.html` in tutorials)_
 
-| Flashcard studying UI logic     | `./study.js`
-| UTF-8 encoded metadata file     | `./cards.index`
+| Styling and a lot of UX (via display/hide CSS hacks)
+| `./index.css`
+
+| UTF-8 encoded <<metadata>> file | `./cards.index`
 | root of all flashcards sets     | `./cards/`
 | example flashcard set           | `./cards/sampleset_calc/`
 | UTF-8 encoded metadata file     | `./cards/sampleset_calc/index`
@@ -56,14 +64,27 @@ Page Sample"].
 == Static Content: Flashcards
 Flashcards are stored as descendents of `./cards/` of this root directory.
 
+== Cards
+.Following assumptions are made about flashcard files:
+. MUST have a dot (`.`) in their name (eg: `myfile_front.my-ext`) +
+  This helps easily distinguish them from sibling <<metadata>> files
+. MUST be in pairs: for each card, there should be a corresponding reverse "side" +
+  Ie.: a <<set>> must have an even number of flashcards.
+. Filename MUST contain Exactly One occurrence of the string `front` or `back`
+. Files content-type will be easily determined by serving infrastructure +
+  Eg.: receiving JavaScript relies on the presence of a correct `content-type`
+  HTTP header.
+
+[[set]]
 === Sets
 Flashcards are considered in "sets", grouping related cards. Sets are defined as
 all cards in a given subdirectory of `./cards/`, eg: `./cards/calc2/` might hold
 flashcards with Calculus II topics. Subdirectories are listed in a UTF-8 encoded
 file at `./cards.index`, a sibling of `./cards/` itself.
 
+[[metadata]]
 .set of flashcards share the common metadata
-. title: a short description of the entire set's topic/contents 
+. title: a short description of the entire set's topic/contents
 . description: an arbitrarily long description of the flashcard's contents.
 . index: this is a newline separated file, where each line contains the name of
 a flashcard's side. Hopefully sorted, but "back" and "front" may not be in order.
@@ -76,4 +97,4 @@ To create a flashcard set quickly from screenshots, the shell script
 reasonable name under `./cards/` and run the script from the new directory. See
 the script's help documentation for more. To use the new cards, make sure
 metadata is written (see previous section in docs or just try
-`../metadata-set.sh`). 
+`../metadata-set.sh`).
