@@ -98,13 +98,9 @@ class StudySetCtl {
     }
   }
 
-  _isAtStart() {
-    return this.available.length === this.setIndex.length;
-  }
+  _isAtStart() { return this.available.length === this.setIndex.length; }
 
-  _isMidSet() {
-    return this.available.length !== 1;
-  }
+  _isMidSet() { return this.available.length !== 1; }
 
   shuffleToggled() {
     let wasShuffleOn = !getPreference(PREFS.shuffle.Key); // we run *post* toggle
