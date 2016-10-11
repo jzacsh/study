@@ -37,20 +37,39 @@ section#sets tbody td:nth-child(2) {
 }
 
 section#cards figcaption {
-  padding-top: 1ex;
+  padding-top: 1em;
+  margin-top: 1em;
+  text-transform: capitalize;
+  font-family: sans-serif;
+  font-size: 0.8em;
+  font-style: italic;
 }
 
 section#cards figure {
   margin-left: 0;
   margin-right: 0;
 }
-section#cards figure img {
+section#cards figure .card {
   margin: 0 auto;
   display: block;
   max-width: 100%;
 }
 
-section#cards figure.back img {
+section#cards[data-content-type="image"] figure p.card,
+section#cards[data-content-type="text"] figure img.card {
+  display: none;
+}
+
+section#cards figure p.card {
+  white-space: pre-line;
+  padding: 1ex;
+}
+
+section#cards figure.back p.card {
+  text-align: left;
+}
+
+section#cards figure.back .card {
   outline: 1px dotted #d45f73;
 }
 

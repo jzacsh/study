@@ -26,6 +26,7 @@ let studySectEl;
 //                  description: string,
 //                  index: !Array.<{front: string, back: string}>,
 //                  entryTrEl: !Element,
+//                  contentType: string,
 //                  ctl: !StudySetCtl,
 //                }
 //               >
@@ -36,10 +37,12 @@ let currentSet; // one of {@link studySets}'s values
 class StudySetCtl {
   /**
    * @param {!Array} a single {@link studySets} value's "index" field.
+   * @param {string} contentType Raw value of the HTTP header "content-type"
    * @param {!Element} <progress> element representing state of this set
    */
-  constructor (setIndex, progressEl) {
+  constructor (setIndex, contentType, progressEl) {
     this.setIndex = setIndex;
+    this.contentType = contentType;
     this.progressEl = progressEl;
     this.restart();
   }
@@ -68,12 +71,25 @@ class StudySetCtl {
     let frontCardUrl = this.setIndex[this.activeIdx].front;
     let backCardUrl = this.setIndex[this.activeIdx].back;
 
-    studySectEl
-        .querySelector('figure.front img')
-        .setAttribute('src', frontCardUrl);
-    studySectEl
-        .querySelector('figure.back img')
-        .setAttribute('src', backCardUrl);
+    if (this.contentType == 'image') {
+      studySectEl
+          .querySelector('figure.front img.card')
+          .setAttribute('src', frontCardUrl);
+      studySectEl
+          .querySelector('figure.back img.card')
+          .setAttribute('src', backCardUrl);
+    } else if (this.contentType == 'text') {
+      fetch(frontCardUrl).then(r => r.text()).then(txt => {
+        studySectEl
+            .querySelector('figure.front p.card')
+            .textContent = txt.trim();
+      });
+      fetch(backCardUrl).then(r => r.text()).then(txt => {
+        studySectEl
+            .querySelector('figure.back p.card')
+            .textContent = txt.trim();
+      });
+    }
 
     if (this._isMidSet() && getPreference(PREFS.shuffle.Key)) {
       PREFS.shuffle.ButtonEl.setAttribute('data-warning', '');
@@ -118,6 +134,10 @@ class StudySetCtl {
     this.render();
   }
 }
+
+let conentTypeToKnownType = function(rawContentType) {
+  return rawContentType.match(/^\b(\w*)\/\w*\b/);
+};
 
 /**
  * Taken from mozilla wiki, nicely explained here:
@@ -232,8 +252,8 @@ window.onload = function () {
       .addEventListener('click', setSelectMode.bind(null /*this*/, true /*shouldSet*/));
 
   Array.from(studySectEl.querySelectorAll('button.reveal')).concat([
-    studySectEl.querySelector('section#cards figure.front img'),
-    studySectEl.querySelector('section#cards figure.back img'),
+    studySectEl.querySelector('section#cards figure.front .card'),
+    studySectEl.querySelector('section#cards figure.back .card'),
   ]).forEach(el => el.addEventListener('click', handleFlipCard));
 
   Array
@@ -286,11 +306,14 @@ let handleLaunchStudyOf = function(studySet) {
 
   currentSet = studySet;
 
-  currentSet.ctl = currentSet.ctl ||
-      new StudySetCtl(currentSet.index, studySectEl.querySelector('progress'));
+  currentSet.ctl = currentSet.ctl || new StudySetCtl(
+      currentSet.index,
+      currentSet.contentType,
+      studySectEl.querySelector('progress'));
 
   studySectEl.querySelector('h1').textContent = currentSet.title;
 
+  studySectEl.setAttribute('data-content-type', currentSet.contentType);
   studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
   currentSet.ctl.render();
 }
@@ -383,7 +406,13 @@ let refreshDashboardUi = function() {
     // TODO share code with worker.js and share "offline-v1" string
     caches.open('offline-v1').then(function(s, c) {
       return c.match(s.index[0].front).then(r => {
-        s.contentType = r.headers.get('content-type');
+        let knownType = conentTypeToKnownType(r.headers.get('content-type'));
+        if (!knownType) {
+          // TODO: someway to message a problem
+          s.contentType = r.headers.get('content-type');
+          return;
+        }
+        s.contentType = knownType[1];
       });
     }.bind(null /*this*/, set));
     studySets[set.url] = set;
