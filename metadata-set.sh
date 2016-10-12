@@ -2,8 +2,11 @@
 set -euo pipefail
 
 declare -r flashcardRegexp='*.*'
-this="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"; declare -r this
+self="$(readlink -f "${BASH_SOURCE[0]}")"; declare -r self
+dir="$(dirname "$self")"; declare -r dir
+this="$(basename "$self")"; declare -r this
 usage() (
+  local staticReadme="$dir"/static/README.adoc
   printf 'USAGE: `%s CARDS_DIR [TITLE DESCRIPTION]`
 
   Writes new metadata files to CARDS_DIR describing flashcard set.
@@ -16,7 +19,11 @@ usage() (
     - DESCRIPTION: Arbitrarily long string decribing flashcard set, perhaps
       including dates intended for, class used in, sources used, etc.
       If not provided, leaves existing file intact.
-' "$this" "$flashcardRegexp"
+
+   Errors are reported if the CARDS_DIR seems to not adhere to rules documented
+   in static/README.adoc. Your local copy seems to be:
+       %s
+' "$this" "$flashcardRegexp" "$(readlink -f "$staticReadme")"
 )
 
 if (( $# >= 1 )) && { [[ $1 = help ]] || [[ $1 = --help ]] || [[ $1 = -h ]]; }; then
@@ -37,7 +44,48 @@ declare -r arg_cardDir="$1"
 { [[ -d "$arg_cardDir" ]] && [[ -w "$arg_cardDir" ]] && [[ -r "$arg_cardDir" ]]; } ||
   usageTip 'CARDS_DIR not a readable & writeable directory.\n' "$arg_cardDir"
 
+assertFlashcardsRulesMet() (
+  while read baseName; do
+    if [[ "$baseName" =~ '\.' ]];then
+      {
+        [ "$baseName" = index ] ||
+        [ "$baseName" = title ] ||
+        [ "$baseName" = description ]
+      } ||
+        printf \
+          'Warning: ignoring non-metadata non-flashcard file:\n\t%s\n' \
+          "$baseName" >&2
+    else
+      if [[ "$baseName" =~ '(front|back).*(front|back)' ]];then
+        usageTip \
+          'flashcard must have ONE occurance of either "front" or "back" in its name. Got:\n\t%s\n' \
+          "$baseName"
+      fi
+    fi
+  done < <(
+    find "$arg_cardDir" \
+        -mindepth 1 -maxdepth 1 \
+        -type f \
+        -printf '%P\n'
+  )
+
+  local numCards; numCards="$(
+    find "$arg_cardDir" \
+        -mindepth 1 -maxdepth 1 \
+        -type f \
+        -name "$flashcardRegexp"  \
+        -print | wc -l
+  )"
+  if (( numCards % 2 ));then
+    usageTip \
+      'Expecting even number of flashcards, but %d files matched\n' \
+      $numCards
+  fi
+)
+
 writeIndexFile() (
+  assertFlashcardsRulesMet
+
   find "$arg_cardDir" \
     -mindepth 1 -maxdepth 1 \
     -type f \
