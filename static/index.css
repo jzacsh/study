@@ -2,7 +2,10 @@ section {
   text-align: center;
   border-top: 1px dotted #999;
 }
-section:first-child { border-top: none; }
+body[data-study-mode="studying"] section,
+section:first-child {
+  border-top: none;
+}
 footer {
   padding-top: 1ex;
   margin-top: 1em;
@@ -142,3 +145,6 @@ section#settings button.pref .warning { display: none; }
 .network-status.network-offline {
   background-color: #ffa274;
 }
+
+body[data-install-state="partial"] [data-install="full"],
+body[data-install-state="full"] [data-install="partial"] { display: none; }

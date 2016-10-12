@@ -217,12 +217,19 @@ window.onload = function () {
     throw new Error(fatal); // stop this file's execution
   }
 
+  let finishInstallEls = Array.from(document.querySelectorAll('.finish-install'));
+  document.body.setAttribute(
+      'data-install-state',
+      navigator.serviceWorker.controller ? 'full' : 'partial');
+  finishInstallEls.forEach(el => el.addEventListener('click', e => location.reload()));
+
   navigator.serviceWorker.addEventListener('message', serviceWorkerMessagHandler);
 
   let refreshButtonEl = document.querySelector('#refresh');
   refreshButtonEl.setAttribute('disabled', '');
   navigator.serviceWorker
       .register('worker.js')
+      .then(registrations => navigator.serviceWorker.ready.then(_ => registrations))
       .then(registrations => {
         refreshButtonEl.removeAttribute('disabled');
         refreshButtonEl.addEventListener('click', function(unregister, e) {
@@ -234,12 +241,13 @@ window.onload = function () {
           e.target.textContent = 'refreshing...';
           e.target.setAttribute('disabled', '');
 
-          // TODO: before unregistering, first postMessage and have REFRESH
-          // logic take place ServiceWorker's side; currently failing to get a
-          // non null "controller" property on:
+          // TODO: consider adding better cache busting logic in worker.js, and
+          // triggering it with something from here, like:
+          //   if (navigator.serviceWorker.controller) {
           //     navigator.serviceWorker.controller.postMessage('REFRESH');
+          //   }
           return unregister()
-              .then(_ => { return caches.keys(); })
+              .then(_ => caches.keys())
               .then(cacheKeys => {
                 return Promise.all(cacheKeys.map(key => {
                   return caches.delete(key);

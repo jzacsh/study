@@ -8,6 +8,10 @@
   <body data-study-mode="selection">
     <section id="sets" class="study">
       <h1><span data-qty-sets>0</span> Loaded Flashcard Sets</h1>
+      <p data-install="partial">
+        <strong>Warning</strong>: <a href="#" class="finish-install">refresh</a> to finish install!
+      </p>
+
       <p>Below are offline-first flashcard sets. Data seen here will be
       available when you visit offline.</p>
       <table class="selection" cellspacing="5pt">
@@ -55,9 +59,16 @@
     <section id="settings">
       <h1>Settings</h1>
       <p>
-        App is currently
+        App is
         <span class="network-status network-online">online</span>
         <span class="network-status network-offline">offline</span>
+
+        and
+         <span data-install="partial">
+               only partly - <a href="#" class="finish-install">complete now</a> -
+         </span>
+         <span data-install="full">fully</span>
+        installed.
       </p>
       <table>
         <thead>
