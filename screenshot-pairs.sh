@@ -16,7 +16,7 @@ this="$(basename "$(readlink -f "${BASH_SOURCE[0]}")")"; declare -r this
 
   Screenshots start at 1, unless INTEGER is provided (eg: 03) which causes the
   program to prompt for creation of flashcards_INTEGER_front.png (eg:
-  flashcards__front.png)
+  flashcards_03_front.png)
 
   Some other likely-buggy stuff is at play (eg: trying to pause every few
   screenshots to allow you to scroll - say in a large PDF).
