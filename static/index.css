@@ -12,11 +12,19 @@ footer {
   border-top: 1px dotted #999;
 }
 
-body[data-study-mode="selection"] section#cards,
-body[data-study-mode="studying"] section#sets,
-body[data-study-mode="studying"] section#settings,
-body[data-study-mode="studying"] section.more,
-body[data-study-mode="studying"] footer,
+/** Views: swithing between STUDYING, LISTING, SELECTION modes. */
+body:not([data-study-mode="studying"]) section#cards,
+
+body:not([data-study-mode="listing"]) section#listing,
+
+body:not([data-study-mode="selection"]) section#sets,
+body:not([data-study-mode="selection"]) section#settings,
+body:not([data-study-mode="selection"]) section.more,
+body:not([data-study-mode="selection"]) footer {
+  display: none;
+}
+/* EOF Views */
+
 section#cards[data-study-state="front"] figure.back,
 section#cards[data-study-state="back"] figure.front {
   display: none;
