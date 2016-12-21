@@ -20,6 +20,26 @@ The end-goal of this webapp is to facilitate offline display of front, then back
 of <<flashcards>> (webp images, and now UTF8 encoded `.txt` files) on a phone,
 without an internet connection.
 
+== Development
+
+There are no tests for this app, currently. Also no standards - not using any
+compiler, module system, polyfills, etc. This is raw JS - freely using bleeding
+edge web-(not-yet)-standards wherever I like.
+
+Being a static client-side webapp, there's no real tooling to run over the
+JS/HTML/CSS (and no pre-proceessing, eg: SASS). To serve this app to your self,
+simply serve this directory (`static/`) from an HTTP(S) web server.
+
+.Avoiding SSL `ServiceWorker` Errors; either:
+. only serve with SSL, with *valid* certs
+. only serve non-SSL, from `localhost` or `127` addresses footnoteref:[nossl,
+  obviously this is the choice you want for local development]
+
+=== TODOs
+
+To see a list of features/technical TODOs, see
+https://github.com/jzacsh/study/issues
+
 == Architecture
 Using the latest `ServiceWorker` APIs to serve the app out of plain static file
 servers (in my case, my personal CDN), and achieve offline caching on my phone.
