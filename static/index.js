@@ -466,6 +466,7 @@ let refreshDashboardUi = function() {
     let tdSize = document.createElement('td');
     let listingLink = document.createElement('a');
     listingLink.textContent = set.index.length.toString();
+    listingLink.setAttribute('href', '#');
     listingLink.addEventListener(
         'click',
         handleListingOf.bind(null /*this*/, set));
