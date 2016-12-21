@@ -302,9 +302,9 @@ window.onload = function () {
     updatePrefTo(pref.Key, prefVal);
   });
 
-  studySectEl
-      .querySelector('nav button.to-selection')
-      .addEventListener('click', setSelectMode.bind(null /*this*/, UI_MODE.SELECTION));
+  Array
+      .from(document.querySelectorAll('nav button.to-selection'))
+      .forEach(el => el.addEventListener('click', setSelectMode.bind(null /*this*/, UI_MODE.SELECTION)));
 
   Array.from(studySectEl.querySelectorAll('button.reveal')).concat([
     studySectEl.querySelector('section#cards figure.front .card'),
