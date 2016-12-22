@@ -179,6 +179,10 @@ section#listing table {
   border-spacing: 1em;
 }
 
+section#listing [data-ispinned="true"] {
+  text-shadow: 2px 2px 5px #ffc860;
+}
+
 /* element that exists purely so we can reuse the DOM structure, but its
  * contents should be ignored */
 section#listing tbody tr[data-dom-cache] { display: none; }

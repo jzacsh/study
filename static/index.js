@@ -291,7 +291,7 @@ class ListSetCtl {
         trEl.setAttribute('data-card-idx', i);
 
         tdStarEl = document.createElement('td');
-        tdStarEl.setAttribute('class', 'ispinned')
+        tdStarEl.setAttribute('data-ispinned', 'false')
         trEl.appendChild(tdStarEl);
 
         tdCardsEl = document.createElement('td');
@@ -300,7 +300,7 @@ class ListSetCtl {
       } else {
         isReuse = isPopulationMatching;
         trEl = trs[i];
-        tdStarEl = trEl.querySelector('td.ispinned');
+        tdStarEl = trEl.querySelector('td[data-ispinned]');
         tdCardsEl = trEl.querySelector('td.cards');
       }
 
