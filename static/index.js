@@ -16,9 +16,6 @@ let UI_MODE = {
   // Given a set, list its cards
 };
 
-/** @param {UI_MODE} uiMode */
-let setSelectMode = function (uiMode) { document.body.setAttribute('data-study-mode', uiMode); };
-
 // TODO write runtime assertion that these map back correctly
 let REVERSE_PREFS = {
   'prefs.FLIP_CARD': 'flip_card',
@@ -27,59 +24,70 @@ let REVERSE_PREFS = {
 
 // important global state needed by handlers
 let studySectEl;
-// @type {!Object<string,
-//                {
-//                  id: string,
-//                  url: string,
-//                  title: string,
-//                  description: string,
-//                  index: !Array.<{front: string, back: string}>,
-//                  entryTrEl: !Element,
-//                  studyCtl: !StudySetCtl,
-//                  listCtl: !ListSetCtl,
-//                }
-//               >
-//       }
+let listingSectEl;
+/**
+ * @type {!Object<string, !CardSet>}
+ */
 let studySets = {};
 let currentSet; // one of {@link studySets}'s values
 
+// @type {
+//     cardSet: !CardSet,
+//     studyCtl: ?StudySetCtl,
+//     listCtl: ?ListSetCtl
+// }
+// typedef: "Set"
+
+
 /**
- * Manages study-progress; ie: progress & front/back toggling of cards in a given set.
+ * @param {!Event} e
+ *     The triggering user-event in the DOM
  */
-class StudySetCtl {
+let handleMoveToDashboard = function(e) { setAppMode(UI_MODE.SELECTION); };
+
+/**
+ * @param {UI_MODE} uiMode
+ * @param {!Set} opt_set
+ *     ONLY optional when UI_MODE.SELECTION. Otherwise, opt_set is required.
+ */
+let setAppMode = function (uiMode, opt_set) {
+  if (!opt_set && uiMode != UI_MODE.SELECTION) {
+    throw new Error('UI_MODE switched to "' + uiMode + '", but no set provided for it');
+  }
+
+  document.body.setAttribute('data-study-mode', uiMode);
+  currentSet = opt_set;
+};
+
+class CardSet {
   /**
-   * @param {!Array} cards
-   *     A single {@link studySets} value's "index" field.
-   * @param {!Element} progressEl
-   *     <progress> element representing state of this set
+   * @param {
+   *     id: string,
+   *     url: string,
+   *     title: string,
+   *     description: string,
+   *     index: !Array.<{front: string, back: string}>,
+   *     entryTrEl: !Element
+   * } cards
    */
-  constructor (cards, progressEl) {
-    this.cards = cards;
+  constructor (cards) {
+    this.cards_ = cards;
     this.contentType_ = null;
-    this.progressEl = progressEl;
-    this.restart();
+
+    // Expose fields for easy refactoring (ie: not ideal, but a lot of code
+    // touched these fields before this Class and its constructor even existed)
+    this.id = cards.id;
+    this.url = cards.url;
+    this.title = cards.title;
+    this.description = cards.description;
+    this.index = cards.index;
+    this.entryTrEl = cards.entryTrEl;
   }
 
   get ready() {
     return Promise.all([
       this.getContentType(),
-    ]).then(_ => { return this; });
-  }
-
-  restart() {
-    this.available = [];
-    for (let i = 0; i < this.cards.length; ++i) {
-      this.available.push(i);
-    }
-
-    if (getPreference(PREFS.shuffle.Key)) {
-      this.activeIdx = StudySetCtl.getRandomIntMoz_(0, this.cards.length - 1);
-    } else {
-      this.activeIdx = 0;
-    }
-
-    this.getContentType();
-    this.render();
+    ]).then(_ => { return this.contentType_; });
   }
 
   getContentType() {
@@ -90,11 +98,15 @@ class StudySetCtl {
     // TODO share code with worker.js and share "offline-v1" string
     return caches
         .open('offline-v1')
-        .then(c => c.match(this.cards[0].front))
+        .then(c => c.match(this.cards_.index[0].front))
         .then(match => {
+          // TODO: handle the case where match === `undefined`; ie: no match
+          // NOTE: seems to occur when cache is manually cleared via the app's
+          // agressive "clear caches" button
+
           let header = match.headers.get('content-type');
           // TODO: someway to message a problem
-          this.contentType_ = StudySetCtl.conentTypeToKnownType_(header) || header;
+          this.contentType_ = CardSet.conentTypeToKnownType_(header) || header;
           return Promise.resolve(this.contentType_);
         });
   }
@@ -102,25 +114,59 @@ class StudySetCtl {
   static conentTypeToKnownType_(rawContentType) {
     let matches = rawContentType.match(/^\b(\w*)\/\w*\b/);
     return matches && matches.length ? matches[1] : null;
-  };
+  }
+}
+
+/**
+ * Manages study-progress; ie: progress & front/back toggling of cards in a given set.
+ */
+class StudySetCtl {
+  /**
+   * @param {!CardSet} cardSet
+   * @param {string} contentType
+   * @param {!Element} progressEl
+   *     <progress> element representing state of this set
+   */
+  constructor (cardSet, contentType, progressEl) {
+    this.set = cardSet;
+    this.contentType = contentType;
+    this.progressEl = progressEl;
+    this.restart();
+  }
+
+  restart() {
+    this.available = [];
+    for (let i = 0; i < this.set.index.length; ++i) {
+      this.available.push(i);
+    }
+
+    if (getPreference(PREFS.shuffle.Key)) {
+      this.activeIdx = StudySetCtl.getRandomIntMoz_(0, this.set.index.length - 1);
+    } else {
+      this.activeIdx = 0;
+    }
+
+    this.set.getContentType();
+    this.render();
+  }
 
   render() {
     this.progressEl.setAttribute(
-        'max', this.cards.length);
+        'max', this.set.index.length);
     this.progressEl.setAttribute(
-        'value', this.cards.length - this.available.length);
+        'value', this.set.index.length - this.available.length);
 
-    let frontCardUrl = this.cards[this.activeIdx].front;
-    let backCardUrl = this.cards[this.activeIdx].back;
+    let frontCardUrl = this.set.index[this.activeIdx].front;
+    let backCardUrl = this.set.index[this.activeIdx].back;
 
-    if (this.contentType_ == 'image') {
+    if (this.contentType == 'image') {
       studySectEl
           .querySelector('figure.front img.card')
           .setAttribute('src', frontCardUrl);
       studySectEl
           .querySelector('figure.back img.card')
           .setAttribute('src', backCardUrl);
-    } else if (this.contentType_ == 'text') {
+    } else if (this.contentType == 'text') {
       fetch(frontCardUrl).then(r => r.text()).then(txt => {
         studySectEl
             .querySelector('figure.front p.card')
@@ -140,7 +186,7 @@ class StudySetCtl {
     }
   }
 
-  isAtStart_() { return this.available.length === this.cards.length; }
+  isAtStart_() { return this.available.length === this.set.index.length; }
 
   isMidSet_() { return this.available.length !== 1; }
 
@@ -186,10 +232,19 @@ class StudySetCtl {
 
 class ListSetCtl {
   /**
-   * @param {!Array} cards
-   *     A single {@link studySets} value's "index" field.
+   * @param {!CardSet} cardSet
+   * @param {string} contentType
+   * @param {!Element} listingSection
    */
-  constructor (cards) {
+  constructor (cardSet, contentType, listingSection) {
+    this.set = cardSet;
+    this.contentType = contentType;
+    this.listingSection = listingSection;
+  }
+
+  render() {
+    // TODO: actually do stuff
+    console.log(this);
   }
 }
 
@@ -282,9 +337,10 @@ window.onload = function () {
         }.bind(null /*this*/, _ => { return registrations.unregister(); }));
       });
 
-  uiTick(performance.now());
-
   studySectEl = document.querySelector('section#cards');
+  listingSectEl = document.querySelector('section#listing');
+
+  uiTick(performance.now());
 
   Object.keys(PREFS).forEach(cssSuffix => {
     let pref = PREFS[cssSuffix];
@@ -304,7 +360,7 @@ window.onload = function () {
 
   Array
       .from(document.querySelectorAll('nav button.to-selection'))
-      .forEach(el => el.addEventListener('click', setSelectMode.bind(null /*this*/, UI_MODE.SELECTION)));
+      .forEach(el => el.addEventListener('click', handleMoveToDashboard.bind(null /*this*/)));
 
   Array.from(studySectEl.querySelectorAll('button.reveal')).concat([
     studySectEl.querySelector('section#cards figure.front .card'),
@@ -360,37 +416,28 @@ let getPreference = function(prefKey) {
 };
 
 /**
- * @param {!Object} studySet
- *     Single value described by {@link studySets}.
+ * @param {!Set} set
  * @param {!Event} event
  */
-let handleLaunchStudyOf = function(studySet, event) {
-  setSelectMode(UI_MODE.STUDYING);
+let handleLaunchStudyOf = function(set, event) {
+  setAppMode(UI_MODE.STUDYING, set);
 
-  currentSet = studySet;
-  currentSet.studyCtl = currentSet.studyCtl || new StudySetCtl(
-      currentSet.index,
-      studySectEl.querySelector('progress'));
-  currentSet.studyCtl.ready.then(_ => {
+  currentSet.cardSet.ready.then(contentType => {
     studySectEl.querySelector('h1').textContent = currentSet.title;
-
-    currentSet.studyCtl.getContentType()
-        .then(type => studySectEl.setAttribute('data-content-type', type));
+    studySectEl.setAttribute('data-content-type', contentType);
     studySectEl.setAttribute('data-study-state', STUDY_STATE.front);
     currentSet.studyCtl.render();
   });
 };
 
 /**
- * @param {!Object} studySet
- *     Single value described by {@link studySets}.
+ * @param {!Set} set
  * @param {!Event} event
  */
-let handleListingOf = function(studySet, event) {
-  setSelectMode(UI_MODE.LISTING);
-  currentSet = studySet;
-  currentSet.listCtl = currentSet.listCtl || new ListSetCtl(studySet);
-  console.log('not doing anything yet', currentSet.listCtl);
+let handleListingOf = function(set, event) {
+  setAppMode(UI_MODE.LISTING, set);
+  // TODO: set title from currentSet.title
+  set.listCtl.render();
 };
 
 let handleNextCardFront = function(event) {
@@ -401,7 +448,7 @@ let handleNextCardFront = function(event) {
 let handleTogglePref = function(prefKey, event) {
   updatePrefTo(prefKey, !getPreference(prefKey));
 
-  if (prefKey == PREFS.shuffle.Key) {
+  if (currentSet && prefKey == PREFS.shuffle.Key) {
     currentSet.studyCtl.shuffleToggled();
   }
 };
@@ -442,6 +489,8 @@ let refreshDashboardUi = function() {
   Array.from(tblEl.querySelectorAll('tr')).forEach(el => {
     el.parentNode.removeChild(el);
   });
+
+  let progressEl = studySectEl.querySelector('progress');
   urls['cards.index'].forEach(cardSet => {
     let set = {id: cardSet, url: 'cards/' + cardSet};
     for (let key of ['title', 'description', 'index']) {
@@ -457,9 +506,6 @@ let refreshDashboardUi = function() {
     let tdTitle = document.createElement('td');
     let launchStudyButton = document.createElement('button');
     launchStudyButton.textContent = set.title;
-    launchStudyButton.addEventListener(
-        'click',
-        handleLaunchStudyOf.bind(null /*this*/, set));
     tdTitle.appendChild(launchStudyButton);
     trEl.appendChild(tdTitle);
 
@@ -467,9 +513,6 @@ let refreshDashboardUi = function() {
     let listingLink = document.createElement('a');
     listingLink.textContent = set.index.length.toString();
     listingLink.setAttribute('href', '#');
-    listingLink.addEventListener(
-        'click',
-        handleListingOf.bind(null /*this*/, set));
     tdSize.appendChild(listingLink);
     trEl.appendChild(tdSize);
 
@@ -479,7 +522,19 @@ let refreshDashboardUi = function() {
 
     tblEl.appendChild(set.entryTrEl = trEl);
 
-    studySets[set.url] = set;
+    // @type {!Set} Settled API of this set
+    studySets[set.url] = {cardSet: new CardSet(set), studyCtl: null, listCtl: null};
+    studySets[set.url].cardSet.ready.then(contentType => {
+      studySets[set.url].studyCtl = new StudySetCtl(studySets[set.url].cardSet, contentType, progressEl);
+      studySets[set.url].listCtl = new ListSetCtl(studySets[set.url].cardSet, contentType, listingSectEl);
+    });
+
+    listingLink.addEventListener(
+        'click',
+        handleListingOf.bind(null /*this*/, studySets[set.url]));
+    launchStudyButton.addEventListener(
+        'click',
+        handleLaunchStudyOf.bind(null /*this*/, studySets[set.url]));
   });
 };
 
