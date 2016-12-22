@@ -243,6 +243,7 @@ class ListSetCtl {
 
     this.titleEl_ = this.listingSection.querySelector('h1');
     this.tbodyEl_ = this.listingSection.querySelector('table tbody');
+    this.descriptionEl_ = this.listingSection.querySelector('p.description');
 
     this.ICON_PIN = {
       PINNED: '&#9733;', // black star
@@ -252,6 +253,7 @@ class ListSetCtl {
 
   render() {
     this.titleEl_.textContent = this.set.title;
+    this.descriptionEl_.textContent = this.set.description || '';
 
     let isPopulationMatching = (() => {
       let type = this.tbodyEl_.getAttribute('data-listing-type');

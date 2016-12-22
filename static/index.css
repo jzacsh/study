@@ -158,6 +158,7 @@ body[data-install-state="partial"] [data-install="full"],
 body[data-install-state="full"] [data-install="partial"] { display: none; }
 
 section#listing thead { text-align: center; }
+section#listing p.description { font-style: italic; }
 
 section#listing tbody td.cards img {
   margin: 0 auto;
