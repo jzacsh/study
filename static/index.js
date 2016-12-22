@@ -240,12 +240,124 @@ class ListSetCtl {
     this.set = cardSet;
     this.contentType = contentType;
     this.listingSection = listingSection;
+
+    this.titleEl_ = this.listingSection.querySelector('h1');
+    this.tbodyEl_ = this.listingSection.querySelector('table tbody');
+
+    this.ICON_PIN = {
+      PINNED: '&#9733;', // black star
+      UNPINNED: '&#9734;', // white star
+    };
   }
 
   render() {
-    // TODO: actually do stuff
-    console.log(this);
+    this.titleEl_.textContent = this.set.title;
+
+    let isPopulationMatching = (() => {
+      let type = this.tbodyEl_.getAttribute('data-listing-type');
+      if (!type) {
+        return false;
+      }
+      return type == this.contentType;
+    })();
+    this.tbodyEl_.setAttribute('data-listing-type', this.contentType);
+
+    let trs = Array.from(this.tbodyEl_.querySelectorAll('tr')).sort((aEl, bEl) => {
+      let a = parseInt(aEl.getAttribute('data-card-idx'), 10);
+      let b = parseInt(bEl.getAttribute('data-card-idx'), 10);
+      if (a === b) {
+        return 0;
+      }
+      return a < b ? -1 : 1;
+    });
+
+    trs.forEach(el => el.setAttribute('data-dom-cache', 'data-dom-cache'));
+
+    if (!isPopulationMatching) {
+      Array.from(this.tbodyEl_.querySelectorAll('td.cards')).forEach(tdCardsEl => {
+        while (tdCardsEl.firstChild) {
+          tdCardsEl.removeChild(tdCardsEl.firstChild);
+        }
+      });
+    }
+
+    for (let i = 0; i < this.set.index.length; ++i) {
+      let trEl, tdStarEl, tdCardsEl;
+      let isReuse = false;
+      if (i >= trs.length) {
+        trEl = document.createElement('tr');
+        trEl.setAttribute('data-card-idx', i);
+
+        tdStarEl = document.createElement('td');
+        tdStarEl.setAttribute('class', 'ispinned')
+        trEl.appendChild(tdStarEl);
+
+        tdCardsEl = document.createElement('td');
+        tdCardsEl.setAttribute('class', 'cards');
+        trEl.appendChild(tdCardsEl);
+      } else {
+        isReuse = isPopulationMatching;
+        trEl = trs[i];
+        tdStarEl = trEl.querySelector('td.ispinned');
+        tdCardsEl = trEl.querySelector('td.cards');
+      }
+
+      // TODO(gh#2): add actual pinning logic/storage here
+      tdStarEl.innerHTML = this.ICON_PIN.UNPINNED;
+
+      let frontCardEl, backCardEl;
+      // TODO: add captions "front" and "back" surrounding cards
+      switch(this.contentType) {
+        case 'image':
+          if (isReuse) {
+            frontCardEl = tdCardsEl.querySelector('img.front');
+            backCardEl = tdCardsEl.querySelector('img.back');
+          } else {
+            frontCardEl = document.createElement('img');
+            frontCardEl.setAttribute('class', 'front');
+            tdCardsEl.appendChild(frontCardEl);
+
+            backCardEl = document.createElement('img');
+            backCardEl.setAttribute('class', 'back');
+            tdCardsEl.appendChild(backCardEl);
+          }
+          frontCardEl.setAttribute('src', this.set.index[i].front);
+
+          backCardEl.setAttribute('src', this.set.index[i].back);
+          break;
+
+        case 'text':
+          if (isReuse) {
+            frontCardEl = tdCardsEl.querySelector('p.front');
+            backCardEl = tdCardsEl.querySelector('p.back');
+          } else {
+            frontCardEl = document.createElement('p');
+            frontCardEl.setAttribute('class', 'front');
+            tdCardsEl.appendChild(frontCardEl);
+
+            backCardEl = document.createElement('p');
+            backCardEl.setAttribute('class', 'back');
+            tdCardsEl.appendChild(backCardEl);
+          }
+          fetch(this.set.index[i].front).then(r => r.text()).then(txt => {
+            frontCardEl.textContent = txt.trim();
+          });
+          fetch(this.set.index[i].back).then(r => r.text()).then(txt => {
+            backCardEl.textContent = txt.trim();
+          });
+          break;
+
+        default:
+          throw new Error(
+              'unrecognized content-type, "' + this.contentType + '"');
+          break;
+      }
+
+      trEl.removeAttribute('data-dom-cache');
+      this.tbodyEl_.appendChild(trEl);
+    }
   }
+
 }
 
 let serviceWorkerMessagHandler = function(event) {
@@ -525,8 +637,10 @@ let refreshDashboardUi = function() {
     // @type {!Set} Settled API of this set
     studySets[set.url] = {cardSet: new CardSet(set), studyCtl: null, listCtl: null};
     studySets[set.url].cardSet.ready.then(contentType => {
-      studySets[set.url].studyCtl = new StudySetCtl(studySets[set.url].cardSet, contentType, progressEl);
-      studySets[set.url].listCtl = new ListSetCtl(studySets[set.url].cardSet, contentType, listingSectEl);
+      studySets[set.url].studyCtl = new StudySetCtl(
+          studySets[set.url].cardSet, contentType, progressEl);
+      studySets[set.url].listCtl = new ListSetCtl(
+          studySets[set.url].cardSet, contentType, listingSectEl);
     });
 
     listingLink.addEventListener(

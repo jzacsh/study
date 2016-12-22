@@ -156,3 +156,28 @@ section#settings button.pref .warning { display: none; }
 
 body[data-install-state="partial"] [data-install="full"],
 body[data-install-state="full"] [data-install="partial"] { display: none; }
+
+section#listing thead { text-align: center; }
+
+section#listing tbody td.cards img {
+  margin: 0 auto;
+  max-width: 100%;
+  display: block;
+}
+
+section#listing tbody td.cards img:last-child {
+  border-top: 1px solid #666;
+  margin-top: 1em;
+  padding-top: 1em;
+}
+
+section#listing tbody tr { outline: 1px dotted #aaa; }
+
+section#listing table {
+  border-collapse: separate;
+  border-spacing: 1em;
+}
+
+/* element that exists purely so we can reuse the DOM structure, but its
+ * contents should be ignored */
+section#listing tbody tr[data-dom-cache] { display: none; }
