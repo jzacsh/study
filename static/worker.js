@@ -22,6 +22,15 @@ let OFFLINE_URL_DEPS = [
   FLASHCARD_INDEXES
 ];
 
+/**
+ * @param {string} relUrl
+ * @return {string}
+ */
+let relToAbsUrl = function(relUrl) {
+  const rootPathName = location.pathname.match(/^.*\//g)[0];
+  return rootPathName + relUrl;
+};
+
 const CARDSET_URL_PREFIX = 'cards';
 
 function objectVals(obj) {
@@ -46,7 +55,7 @@ function createCacheBustedRequest(url) {
 
 function refreshDepsCache(cache) {
   return Promise.all(OFFLINE_URL_DEPS.map(depUrl => {
-    return fetch(depUrl).then(function(depResp) {
+    return fetch(relToAbsUrl(depUrl)).then(function(depResp) {
       return cache.put(depUrl, depResp.clone());
     });
   }));
@@ -120,7 +129,7 @@ function refreshFlashcards(fileCache) {
                 let cardIndex;
                 let metadataFetch = function(metadata) {
                   let metadataUrl = cardSetUrl + '/' + metadata;
-                  return fetch(metadataUrl).then(resp => {
+                  return fetch(relToAbsUrl(metadataUrl)).then(resp => {
                     return resp.text().then(body => {
                       let content;
                       if (metadata == 'index') {
@@ -142,7 +151,7 @@ function refreshFlashcards(fileCache) {
                   then(_ => {
                     return Promise.all(cardIndex.map(cardPair => {
                       let cacheCard = function(cardUrl) {
-                        return fetch(cardUrl).then(imgResp => {
+                        return fetch(relToAbsUrl(cardUrl)).then(imgResp => {
                           return fileCache.put(cardUrl, imgResp.clone());
                         });
                       };
@@ -162,7 +171,7 @@ self.addEventListener('install', event => {
   // key, but the actual URL we end up requesting might include a cache-busting
   // parameter.
   event.waitUntil(
-      fetch(createCacheBustedRequest(OFFLINE_URL))
+      fetch(relToAbsUrl(createCacheBustedRequest(OFFLINE_URL)))
           .then(function(freshResponse) {
             return caches
                 .open(CURRENT_CACHES.offline)

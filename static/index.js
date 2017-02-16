@@ -38,6 +38,15 @@ let currentSet; // one of {@link studySets}'s values
 // }
 // typedef: "Set"
 
+/**
+ * @param {string} relUrl
+ * @return {string}
+ */
+let relToAbsUrl = function(relUrl) {
+  const rootPathName = location.pathname.match(/^.*\//g)[0];
+  return rootPathName + relUrl;
+};
+
 
 /**
  * @param {!Event} e
@@ -167,12 +176,12 @@ class StudySetCtl {
           .querySelector('figure.back img.card')
           .setAttribute('src', backCardUrl);
     } else if (this.contentType == 'text') {
-      fetch(frontCardUrl).then(r => r.text()).then(txt => {
+      fetch(relToAbsUrl(frontCardUrl)).then(r => r.text()).then(txt => {
         studySectEl
             .querySelector('figure.front p.card')
             .textContent = txt.trim();
       });
-      fetch(backCardUrl).then(r => r.text()).then(txt => {
+      fetch(relToAbsUrl(backCardUrl)).then(r => r.text()).then(txt => {
         studySectEl
             .querySelector('figure.back p.card')
             .textContent = txt.trim();
@@ -341,10 +350,10 @@ class ListSetCtl {
             backCardEl.setAttribute('class', 'back');
             tdCardsEl.appendChild(backCardEl);
           }
-          fetch(this.set.index[i].front).then(r => r.text()).then(txt => {
+          fetch(relToAbsUrl(this.set.index[i].front)).then(r => r.text()).then(txt => {
             frontCardEl.textContent = txt.trim();
           });
-          fetch(this.set.index[i].back).then(r => r.text()).then(txt => {
+          fetch(relToAbsUrl(this.set.index[i].back)).then(r => r.text()).then(txt => {
             backCardEl.textContent = txt.trim();
           });
           break;
@@ -398,10 +407,12 @@ let serviceWorkerMessagHandler = function(event) {
 };
 
 window.onload = function () {
-  if (location.pathname == '/') {
+  if (!location.pathname.match(/index\.html$/)) {
     // Force viewing of this app via a URL our service worker is easily
     // comfortable with
-    location.pathname = '/index.html';
+    location.pathname += (
+      location.pathname.match(/\/$/) ? '' : '/'
+    ) + 'index.html';
   }
 
   if (!('serviceWorker' in navigator)) {
