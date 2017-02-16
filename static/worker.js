@@ -259,7 +259,7 @@ self.addEventListener('fetch', event => {
     return caches
       .open(CURRENT_CACHES.offline)
       .then(function(rawUrl, openCache) {
-        return openCache.match(requestUrlToRelative(rawUrl));
+        return openCache.match(rawUrl);
       }.bind(null /*this*/, request.url))
       .catch(_ => {
         return fetch(request); // Attempt online requests *last*
@@ -271,7 +271,7 @@ self.addEventListener('fetch', event => {
       return caches
         .open(CURRENT_CACHES.offline)
         .then(function(openCache) {
-          return openCache.match(requestUrlToRelative(request.url));
+          return openCache.match(request.url);
         });
     });
   };
